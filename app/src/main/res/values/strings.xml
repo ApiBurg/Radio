@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Пульс-Радио</string>
+    <string name="error">Ошибка</string>
+    <string name="ok">Хорошо</string>
+    <string name="viber_not_found">Viber отсутствует на вашем устройстве</string>
+    <string name="telegram_not_found">Telegram отсутствует на вашем устройстве</string>
+    <string name="notification">Уведомление проигрывателя</string>
+    <string name="notification_state_play">Состояние проигрывателя</string>
+    <string name="pause">Пауза</string>
+    <string name="previous">Предыдущий</string>
+    <string name="play">Играть</string>
+    <string name="next">Следующий</string>
+    <string name="close">Закрыть</string>
+    <string name="network_error">Плохое соединение с интернетом</string>
+    <string name="info_title">Информация</string>
+    <string name="info" translatable="false">
+        <b>ООО "Пульс-Радио"</b>\n
+        Город вещания: Йошкар-Ола\n
+        Частота вещания: 103,8 FM\n
+        Радиоканал "Пульс-Радио"\n
+        СМИ Эл №ТУ12-00201 от 25.12.2015г.\n\n
+        Телефоны:
+    </string>
+    <string name="number_one" translatable="false"><b><u>(8362) 630088 - прямой эфир</u></b></string>
+    <string name="number_two" translatable="false"><b><u>(8362) 422828 - отдел рекламы</u></b></string>
+    <string name="number_three" translatable="false"><b><u>(8362) 426926 - редакция</u></b>\n</string>
+
+    <string name="adres" translatable="false">Адрес: \n
+<b><u>Республика Марий Эл\n
+г.Йошкар-Ола,\n
+бульвар Победы 15а</u></b>\n
+</string>
+
+    <string name="my_email" translatable="false"><a href="fm@puls-radio.ru">fm@puls-radio.ru</a>\n</string>
+    <string name="my_link" translatable="false"><a href="www.puls-radio.ru">www.puls-radio.ru</a>\n</string>
+    <string name="email" translatable="false">Электронная почта: fm@puls-radio.ru</string>
+    <string name="stop" translatable="false">Stop</string>
+    <string name="notification_channel_name" translatable="false">Player controls</string>
+    <string name="stream_url" translatable="false">"http://178.208.85.117:8000/puls"</string>
+    <string name="loading" translatable="false">Подключение к сервису! Подождите пожалуйста</string>
+</resources>
