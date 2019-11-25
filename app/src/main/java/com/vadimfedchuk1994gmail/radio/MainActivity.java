@@ -1,10 +1,10 @@
 package com.vadimfedchuk1994gmail.radio;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,7 +29,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity implements SongCallBack, View.OnClickListener {
 
     private Context mContext;
-    private int job;
+    private boolean jobService = false;
     private CircleImageView control;
     private TextView currentTrack;
 
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     protected void onDestroy() {
         super.onDestroy();
         if(!playing) {
+            if(mediaController == null) return;
             mediaController.getTransportControls().stop();
             try {
                 unbindService(mServiceConnection);
@@ -123,8 +124,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
 
     private void initParams() {
         mContext = this;
-        SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
-        job = sPref.getInt("JOB", 0);
+        jobService = isMyServiceRunning();
         SongCallBack songCallBack = this;
         getPlaySong = new GetPlaySong(songCallBack);
         timer = new Timer();
@@ -137,10 +137,10 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         CircleImageView infoLogo = findViewById(R.id.info_imageView);
         control = findViewById(R.id.control_imageView);
 
-        if(job == 0){
-            control.setImageResource(R.drawable.play_button);
-        } else {
+        if(jobService){
             control.setImageResource(R.drawable.pause_button);
+        } else {
+            control.setImageResource(R.drawable.play_button);
         }
 
         currentTrack = findViewById(R.id.textView_current_track);
@@ -197,6 +197,18 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         };
 
         bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (PlayerRadioService.class.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

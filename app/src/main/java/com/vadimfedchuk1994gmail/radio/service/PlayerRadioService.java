@@ -88,10 +88,6 @@ public class PlayerRadioService extends Service  {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
-        SharedPreferences.Editor ed = sPref.edit();
-        ed.putInt("JOB", 0);
-        ed.apply();
         mediaSession.release();
         exoPlayer.release();
         stopForeground(true);
@@ -131,17 +127,14 @@ public class PlayerRadioService extends Service  {
         exoPlayer.addListener(new Player.EventListener() {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
-                Log.d("MyLog", "ПРОИЗОШЛА ОШИБКА!!!");
                 forcedPlay();
             }
 
             @Override
             public void onPositionDiscontinuity(int reason) {
-                Log.d("MyLog", "Позиция дисконекта: "+reason);
             }
         });
     }
-
 
     MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
 
