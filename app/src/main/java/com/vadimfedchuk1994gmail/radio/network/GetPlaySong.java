@@ -4,19 +4,11 @@ import android.util.Log;
 
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.TimerTask;
 
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class GetPlaySong extends TimerTask {
 
@@ -51,8 +43,13 @@ public class GetPlaySong extends TimerTask {
         }
 
         if(text != null){
-            String song = text.substring(6, text.indexOf("\'"));
-            callBack.songCallBack(song, true);
+            try {
+                String song = text.substring(6);
+                if(job) callBack.songCallBack(song, true);
+            } catch (RuntimeException e){
+                if(job) callBack.songCallBack("Получение композиции...", true);
+                Log.d("MyLog", String.valueOf(e));
+            }
         }
     }
 

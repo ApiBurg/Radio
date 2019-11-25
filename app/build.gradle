@@ -7,8 +7,8 @@ android {
         applicationId "com.vadimfedchuk1994gmail.radio"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 10
-        versionName "8.2"
+        versionCode 16
+        versionName "9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -30,12 +30,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha02'
     implementation 'de.hdodenhof:circleimageview:3.0.0'
     implementation 'com.google.android.exoplayer:exoplayer:r2.4.0'
-    implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.core:core:1.1.0'
     implementation 'androidx.media:media:1.1.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.14.2'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.9.4'
-    implementation 'com.google.android.exoplayer:extension-okhttp:2.9.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

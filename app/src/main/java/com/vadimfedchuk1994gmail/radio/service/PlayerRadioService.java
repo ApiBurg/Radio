@@ -21,14 +21,15 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -44,6 +45,7 @@ import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
 
 public class PlayerRadioService extends Service  {
 
+    private Context mContext;
     private SimpleExoPlayer exoPlayer;
     private MediaSessionCompat mediaSession;
     final PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
@@ -65,39 +67,20 @@ public class PlayerRadioService extends Service  {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        Context mContext = getApplicationContext();
+        mContext = getApplicationContext();
         mediaSession = new MediaSessionCompat(this, "PlayerService");
         mediaSession.setCallback(mediaSessionCallback);
-
-        startPlayerRadioServer(currentState);
-
-        Handler mainHandler = new Handler();
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
-        TrackSelector trackSelector = new DefaultTrackSelector();
-        LoadControl loadControl = new DefaultLoadControl();
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
-        dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
-        extractorsFactory = new DefaultExtractorsFactory();
-        MediaSource mediaSource =
-                new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory,
-                extractorsFactory, mainHandler, null);
-        exoPlayer.prepare(mediaSource);
-
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            volumeMusic =  audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        }
-
         Intent mediaButtonIntent = new Intent(
                 Intent.ACTION_MEDIA_BUTTON, Uri.parse("http://178.208.85.117:8000/puls"), mContext, MediaButtonReceiver.class);
         mediaSession.setMediaButtonReceiver(
                 PendingIntent.getBroadcast(mContext, 0, mediaButtonIntent, 0));
+        myStartForeground();
+        initializationExoPlayer();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startPlayerRadioServer(currentState);
+        myStartForeground();
         MediaButtonReceiver.handleIntent(mediaSession, intent);
         return super.onStartCommand(intent, flags, startId);
     }
@@ -105,12 +88,14 @@ public class PlayerRadioService extends Service  {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mediaSession.release();
-        exoPlayer.release();
         SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
-        ed.putInt("STATE_PLAY", 0);
+        ed.putInt("JOB", 0);
         ed.apply();
+        mediaSession.release();
+        exoPlayer.release();
+        stopForeground(true);
+        stopSelf();
     }
 
     @Override
@@ -118,27 +103,60 @@ public class PlayerRadioService extends Service  {
         return new PlayerServiceBinder();
     }
 
-
     public class PlayerServiceBinder extends Binder {
         public MediaSessionCompat.Token getMediaSessionToken() {
             return mediaSession.getSessionToken();
         }
     }
 
+    private void initializationExoPlayer() {
+        Handler mainHandler = new Handler();
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
+
+        TrackSelector trackSelector = new DefaultTrackSelector();
+        LoadControl loadControl = new DefaultLoadControl();
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
+        dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
+        extractorsFactory = new DefaultExtractorsFactory();
+        MediaSource mediaSource =
+                    new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory,
+                            extractorsFactory, mainHandler, null);
+
+        exoPlayer.prepare(mediaSource);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            volumeMusic =  audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        }
+
+        exoPlayer.addListener(new Player.EventListener() {
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+                Log.d("MyLog", "ПРОИЗОШЛА ОШИБКА!!!");
+                forcedPlay();
+            }
+
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+                Log.d("MyLog", "Позиция дисконекта: "+reason);
+            }
+        });
+    }
+
+
     MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
 
         @Override
         public void onPlay() {
-            startService(new Intent(getApplicationContext(), PlayerRadioService.class));
             int audioFocusResult = audioManager.requestAudioFocus(
                     audioFocusChangeListener,
                     AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
-            if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return;
+            if(audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return;
             mediaSession.setActive(true);
             mediaSession.setPlaybackState(
                     stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                             PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
+
             prepareToPlay(Uri.parse("http://178.208.85.117:8000/puls"));
             exoPlayer.setPlayWhenReady(true);
             registerReceiver(
@@ -146,10 +164,6 @@ public class PlayerRadioService extends Service  {
                     new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
             currentState = PlaybackStateCompat.STATE_PLAYING;
             refreshNotificationAndForegroundStatus(currentState);
-            SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
-            SharedPreferences.Editor ed = sPref.edit();
-            ed.putInt("STATE_PLAY", 1);
-            ed.apply();
         }
 
         @Override
@@ -164,13 +178,9 @@ public class PlayerRadioService extends Service  {
                 try {
                     unregisterReceiver(becomingNoisyReceiver);
                 } catch (IllegalArgumentException e) {
-                    Log.d("MyLog", "Ресивер не заргестрирован!");
+                    Log.d("MyLog", String.valueOf(e));
                 }
             }
-            SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
-            SharedPreferences.Editor ed = sPref.edit();
-            ed.putInt("STATE_PLAY", 0);
-            ed.apply();
         }
 
         @Override
@@ -181,22 +191,43 @@ public class PlayerRadioService extends Service  {
                     stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED,
                             PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
             currentState = PlaybackStateCompat.STATE_STOPPED;
-            refreshNotificationAndForegroundStatus(currentState);
             if(becomingNoisyReceiver != null){
                 try {
                     unregisterReceiver(becomingNoisyReceiver);
                 } catch (IllegalArgumentException e) {
-                    Log.d("MyLog", "Ресивер не заргестрирован!");
+                    Log.d("MyLog", String.valueOf(e));
                 }
             }
+            audioManager.abandonAudioFocus(audioFocusChangeListener);
+            stopForeground(true);
             stopSelf();
         }
     };
 
     private void prepareToPlay(Uri uri) {
-        ExtractorMediaSource mediaSource =
-                new ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null);
+        ExtractorMediaSource
+             mediaSource =
+                    new ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null);
         exoPlayer.prepare(mediaSource);
+    }
+
+    private void forcedPlay(){
+        int audioFocusResult = audioManager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        if(audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return;
+        mediaSession.setActive(true);
+        mediaSession.setPlaybackState(
+                stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
+        prepareToPlay(Uri.parse("http://178.208.85.117:8000/puls"));
+        exoPlayer.setPlayWhenReady(true);
+        registerReceiver(
+                becomingNoisyReceiver,
+                new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+        currentState = PlaybackStateCompat.STATE_PLAYING;
+        refreshNotificationAndForegroundStatus(currentState);
     }
 
     private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener =
@@ -228,12 +259,10 @@ public class PlayerRadioService extends Service  {
         createNotificationChannel();
         switch (playbackState) {
             case PlaybackStateCompat.STATE_PLAYING:
-                startForeground(notification_id, getNotification(playbackState));
+                startForeground(notification_id, getNotification());
                 break;
 
             case PlaybackStateCompat.STATE_PAUSED:
-                NotificationManagerCompat.from(PlayerRadioService.this)
-                        .notify(notification_id, getNotification(playbackState));
                 stopForeground(false);
                 break;
 
@@ -243,35 +272,26 @@ public class PlayerRadioService extends Service  {
         }
     }
 
-    private void startPlayerRadioServer(int currentState){
+    private void myStartForeground(){
         createNotificationChannel();
-        startForeground(notification_id, getNotification(currentState));
+        startForeground(notification_id, getNotification());
     }
 
-    private Notification getNotification(int playbackState) {
-        NotificationCompat.Builder builder = MediaStyleHelper.from(this, mediaSession);
-
-        builder.addAction(new NotificationCompat.Action(android.R.drawable.ic_menu_close_clear_cancel,
-                getString(R.string.pause),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(this,
-                        PlaybackStateCompat.ACTION_STOP)));
-
-       if (playbackState == PlaybackStateCompat.STATE_PLAYING)
-            builder.addAction(new NotificationCompat.Action(android.R.drawable.ic_media_pause, getString(R.string.pause), MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE)));
-        else
-            builder.addAction(new NotificationCompat.Action(android.R.drawable.ic_media_play, getString(R.string.play), MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE)));
-
+    private Notification getNotification() {
+        NotificationCompat.Builder builder = MediaStyleHelper.from(mContext, mediaSession);
+        builder.addAction(
+                new NotificationCompat.Action(
+                        android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.previous),
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                this, PlaybackStateCompat.ACTION_STOP)));
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(1)
-                .setShowCancelButton(true)
-                .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
+                .setShowActionsInCompactView(0)
                 .setMediaSession(mediaSession.getSessionToken()));
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.drawable.ic_action_notification);
         builder.setColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         builder.setShowWhen(false);
         builder.setPriority(NotificationCompat.PRIORITY_HIGH);
         builder.setOnlyAlertOnce(true);
-        builder.setChannelId("25");
         return builder.build();
     }
 
@@ -287,11 +307,10 @@ public class PlayerRadioService extends Service  {
         }
     }
 
-
     private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+            if(AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
                 mediaSessionCallback.onStop();
             }
         }

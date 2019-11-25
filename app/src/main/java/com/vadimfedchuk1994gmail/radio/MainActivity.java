@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -12,9 +13,9 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
@@ -28,6 +29,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity implements SongCallBack, View.OnClickListener {
 
     private Context mContext;
+    private int job;
     private CircleImageView control;
     private TextView currentTrack;
 
@@ -46,25 +48,11 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         setContentView(R.layout.activity_main);
         initParams();
         initView();
-        startServicePlayRadio();
     }
 
     @Override
     public void songCallBack(final String songName, boolean state) {
-        if(!state){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast toast =
-                            Toast.makeText(mContext,
-                                    getString(R.string.network_error),
-                                    Toast.LENGTH_LONG);
-                    toast.show();
-                    control.setImageResource(R.drawable.play_button);
-                    mediaController.getTransportControls().stop();
-                }
-            });
-        } else {
+        if(state){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -81,18 +69,44 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     public void onClick(View view) {
         if (mediaController != null){
             if(!playing){
+                ContextCompat.startForegroundService(mContext, new Intent(mContext, PlayerRadioService.class));
                 control.setImageResource(R.drawable.pause_button);
                 mediaController.getTransportControls().play();
             } else {
                 control.setImageResource(R.drawable.play_button);
-                mediaController.getTransportControls().stop();
+                mediaController.getTransportControls().pause();
             }
+        } else {
+            control.setImageResource(R.drawable.pause_button);
+            startServicePlayRadio();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean th = true;
+                    while (th){
+                        if(mediaController != null){
+                            mediaController.getTransportControls().play();
+                            th = false;
+                        }
+                    }
+                }
+            }).start();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(!playing) {
+            mediaController.getTransportControls().stop();
+            try {
+                unbindService(mServiceConnection);
+                stopService(new Intent(mContext, PlayerRadioService.class));
+            } catch (IllegalArgumentException e) {
+                Log.d("MyLog", String.valueOf(e));
+            }
+        }
+
         playerServiceBinder = null;
         if (mediaController != null) {
             mediaController.unregisterCallback(callback);
@@ -109,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
 
     private void initParams() {
         mContext = this;
+        SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
+        job = sPref.getInt("JOB", 0);
         SongCallBack songCallBack = this;
         getPlaySong = new GetPlaySong(songCallBack);
         timer = new Timer();
@@ -120,6 +136,13 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         CircleImageView instagramLogo = findViewById(R.id.instagram_imageView);
         CircleImageView infoLogo = findViewById(R.id.info_imageView);
         control = findViewById(R.id.control_imageView);
+
+        if(job == 0){
+            control.setImageResource(R.drawable.play_button);
+        } else {
+            control.setImageResource(R.drawable.pause_button);
+        }
+
         currentTrack = findViewById(R.id.textView_current_track);
         CircleImageView viberLogo = findViewById(R.id.viber_imageView);
         CircleImageView telegramLogo = findViewById(R.id.telegram_imageView);
@@ -135,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     }
 
     private void startServicePlayRadio() {
+        Intent intent = new Intent(mContext, PlayerRadioService.class);
+        ContextCompat.startForegroundService(mContext, intent);
         callback = new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -171,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
             }
         };
 
-        bindService(new Intent(mContext, PlayerRadioService.class), mServiceConnection, BIND_AUTO_CREATE);
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
 }
