@@ -5,8 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     private boolean jobService = false;
     private CircleImageView control;
     private TextView currentTrack;
+    private String currentTrackString;
 
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private MediaControllerCompat mediaController;
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     private GetPlaySong getPlaySong;
     private ServiceConnection mServiceConnection;
     private MediaControllerCompat.Callback callback;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         setContentView(R.layout.activity_main);
         initParams();
         initView();
+        lock();
+        if(jobService) startServicePlayRadio();
+        Log.d("MyLog", "onCreate");
     }
 
     @Override
@@ -56,9 +63,10 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String currentTrackString = currentTrack.getText().toString();
+                    if(currentTrackString == null) currentTrackString = currentTrack.getText().toString();
                     if(currentTrackString.length() != songName.length()){
                         currentTrack.setText(songName);
+                        currentTrackString = songName;
                     }
                 }
             });
@@ -95,9 +103,22 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        getPlaySong.play();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getPlaySong.stop();
+    }
+
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!playing) {
+        if(!playing & !jobService) {
             if(mediaController == null) return;
             mediaController.getTransportControls().stop();
             try {
@@ -115,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         }
         getPlaySong.stop();
         timer.cancel();
+        if(wakeLock != null) wakeLock.release();
         try {
             unbindService(mServiceConnection);
         } catch (IllegalArgumentException e) {
@@ -128,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         SongCallBack songCallBack = this;
         getPlaySong = new GetPlaySong(songCallBack);
         timer = new Timer();
-        timer.schedule(getPlaySong, 0, 15000);
+        timer.schedule(getPlaySong, 0, 5000);
     }
 
     private void initView(){
@@ -144,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         }
 
         currentTrack = findViewById(R.id.textView_current_track);
+        currentTrack.setSelected(true);
         CircleImageView viberLogo = findViewById(R.id.viber_imageView);
         CircleImageView telegramLogo = findViewById(R.id.telegram_imageView);
         CircleImageView whatsAppLogo = findViewById(R.id.whatsapp_imageView);
@@ -209,6 +232,23 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
             }
         }
         return false;
+    }
+
+    private void lock() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm != null) {
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag");
+        }
+        wakeLock.acquire(10*60*1000L /*10 minutes*/);
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager.WifiLock wfl = null;
+        if (wm != null) {
+            wfl = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "sync_all_wifi");
+        }
+        if (wfl != null) {
+            wfl.acquire();
+        }
     }
 
 }

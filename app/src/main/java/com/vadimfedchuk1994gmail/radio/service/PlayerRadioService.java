@@ -9,18 +9,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media.session.MediaButtonReceiver;
 
@@ -40,6 +43,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.vadimfedchuk1994gmail.radio.MainActivity;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
 
@@ -63,6 +67,7 @@ public class PlayerRadioService extends Service  {
     private int volumeMusic;
     private int currentState = PlaybackStateCompat.STATE_PAUSED;
     int notification_id = 12313;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -125,6 +130,7 @@ public class PlayerRadioService extends Service  {
         }
 
         exoPlayer.addListener(new Player.EventListener() {
+
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 forcedPlay();
@@ -252,10 +258,12 @@ public class PlayerRadioService extends Service  {
         createNotificationChannel();
         switch (playbackState) {
             case PlaybackStateCompat.STATE_PLAYING:
-                startForeground(notification_id, getNotification());
+                startForeground(notification_id, getNotification(currentState));
                 break;
 
             case PlaybackStateCompat.STATE_PAUSED:
+                NotificationManagerCompat.from(PlayerRadioService.this)
+                        .notify(notification_id, getNotification(playbackState));
                 stopForeground(false);
                 break;
 
@@ -267,22 +275,46 @@ public class PlayerRadioService extends Service  {
 
     private void myStartForeground(){
         createNotificationChannel();
-        startForeground(notification_id, getNotification());
+        startForeground(notification_id, getNotification(currentState));
     }
 
-    private Notification getNotification() {
+    private Notification getNotification(int playbackState) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                intent, 0);
+
         NotificationCompat.Builder builder = MediaStyleHelper.from(mContext, mediaSession);
+
+        if (playbackState == PlaybackStateCompat.STATE_PLAYING)
+            builder.addAction(
+                    new NotificationCompat.Action(
+                            android.R.drawable.ic_media_pause, getString(R.string.pause),
+                            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                    this,
+                                    PlaybackStateCompat.ACTION_PLAY_PAUSE)));
+        else
+            builder.addAction(
+                    new NotificationCompat.Action(
+                            android.R.drawable.ic_media_play, getString(R.string.play),
+                            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                    this,
+                                    PlaybackStateCompat.ACTION_PLAY_PAUSE)));
+
         builder.addAction(
-                new NotificationCompat.Action(
-                        android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.previous),
+                new NotificationCompat.Action(R.drawable.ic_notification_close, getString(R.string.previous),
                         MediaButtonReceiver.buildMediaButtonPendingIntent(
                                 this, PlaybackStateCompat.ACTION_STOP)));
+
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(0)
+                .setShowActionsInCompactView(0,1)
                 .setMediaSession(mediaSession.getSessionToken()));
         builder.setSmallIcon(R.drawable.ic_action_notification);
         builder.setColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         builder.setShowWhen(false);
+        builder.setContentIntent(pendingIntent);
         builder.setPriority(NotificationCompat.PRIORITY_HIGH);
         builder.setOnlyAlertOnce(true);
         return builder.build();
@@ -308,5 +340,23 @@ public class PlayerRadioService extends Service  {
             }
         }
     };
+
+    private void lock() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm != null) {
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag");
+        }
+        wakeLock.acquire(10*60*1000L /*10 minutes*/);
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager.WifiLock wfl = null;
+        if (wm != null) {
+            wfl = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "sync_all_wifi");
+        }
+        if (wfl != null) {
+            wfl.acquire();
+        }
+    }
+
 
 }

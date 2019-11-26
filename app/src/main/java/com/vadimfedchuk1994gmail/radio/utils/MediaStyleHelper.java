@@ -15,14 +15,11 @@ public class MediaStyleHelper {
 
     public static NotificationCompat.Builder from(
             Context context, MediaSessionCompat mediaSession) {
-        Bitmap icon = BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.logo);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "25");
         builder
                 .setSmallIcon(R.drawable.ic_action_notification)
                 .setContentTitle("Пульс-Радио")
                 .setContentText("103.8 FM")
-                .setLargeIcon(icon)
                 .setDeleteIntent(
                         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
