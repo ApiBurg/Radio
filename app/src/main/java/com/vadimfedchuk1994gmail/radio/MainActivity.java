@@ -136,7 +136,12 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         }
         getPlaySong.stop();
         timer.cancel();
-        if(wakeLock != null) wakeLock.release();
+        try {
+            if(wakeLock != null) wakeLock.release();
+        } catch (RuntimeException e){
+            Log.d("MyLog", String.valueOf(e)); Log.d("MyLog", String.valueOf(e));
+        }
+
         try {
             unbindService(mServiceConnection);
         } catch (IllegalArgumentException e) {
