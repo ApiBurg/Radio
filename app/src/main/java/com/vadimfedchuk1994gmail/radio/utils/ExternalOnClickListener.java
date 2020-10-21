@@ -23,21 +23,6 @@ public class ExternalOnClickListener implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.vk_imageView:
-                Intent vkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://vk.com/yolapulsradio"));
-                mContext.startActivity(vkIntent);
-                break;
-
-            case R.id.instagram_imageView:
-                Intent instagramIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/_u/pulsradio_yo"));
-                mContext.startActivity(instagramIntent);
-                break;
-
-            case R.id.info_imageView:
-                Intent appInfoIntent = new Intent(mContext, ApplicationInfo.class);
-                mContext.startActivity(appInfoIntent);
-                break;
-
             case R.id.control_imageView:
                 break;
 

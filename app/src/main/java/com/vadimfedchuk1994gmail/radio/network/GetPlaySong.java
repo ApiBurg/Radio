@@ -32,7 +32,6 @@ public class GetPlaySong extends TimerTask {
     @Override
     public void run() {
         if(!job) return;
-        Log.d("MyLog", "Получаем информацию о композиции");
         URL url = null;
         String text = null;
         try {

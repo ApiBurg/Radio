@@ -14,6 +14,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     private CircleImageView control;
     private TextView currentTrack;
     private String currentTrackString;
+    private ImageView mImageViewPulse;
 
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private MediaControllerCompat mediaController;
@@ -54,20 +56,16 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         initView();
         lock();
         if(jobService) startServicePlayRadio();
-        Log.d("MyLog", "onCreate");
     }
 
     @Override
     public void songCallBack(final String songName, boolean state) {
         if(state){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(currentTrackString == null) currentTrackString = currentTrack.getText().toString();
-                    if(currentTrackString.length() != songName.length()){
-                        currentTrack.setText(songName);
-                        currentTrackString = songName;
-                    }
+            runOnUiThread(() -> {
+                if(currentTrackString == null) currentTrackString = currentTrack.getText().toString();
+                if(currentTrackString.length() != songName.length()){
+                    currentTrack.setText(songName);
+                    currentTrackString = songName;
                 }
             });
         }
@@ -78,24 +76,23 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         if (mediaController != null){
             if(!playing){
                 ContextCompat.startForegroundService(mContext, new Intent(mContext, PlayerRadioService.class));
-                control.setImageResource(R.drawable.pause_button);
+                control.setImageResource(R.drawable.pause);
                 mediaController.getTransportControls().play();
+                mImageViewPulse.setImageResource(R.drawable.pulse_on);
             } else {
-                control.setImageResource(R.drawable.play_button);
+                control.setImageResource(R.drawable.play);
                 mediaController.getTransportControls().pause();
+                mImageViewPulse.setImageResource(R.drawable.pulse);
             }
         } else {
-            control.setImageResource(R.drawable.pause_button);
+            control.setImageResource(R.drawable.pause);
             startServicePlayRadio();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    boolean th = true;
-                    while (th){
-                        if(mediaController != null){
-                            mediaController.getTransportControls().play();
-                            th = false;
-                        }
+            new Thread(() -> {
+                boolean th = true;
+                while (th){
+                    if(mediaController != null){
+                        mediaController.getTransportControls().play();
+                        th = false;
                     }
                 }
             }).start();
@@ -124,9 +121,7 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
             try {
                 unbindService(mServiceConnection);
                 stopService(new Intent(mContext, PlayerRadioService.class));
-            } catch (IllegalArgumentException e) {
-                Log.d("MyLog", String.valueOf(e));
-            }
+            } catch (IllegalArgumentException ignored) { }
         }
 
         playerServiceBinder = null;
@@ -138,15 +133,10 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         timer.cancel();
         try {
             if(wakeLock != null) wakeLock.release();
-        } catch (RuntimeException e){
-            Log.d("MyLog", String.valueOf(e)); Log.d("MyLog", String.valueOf(e));
-        }
-
+        } catch (RuntimeException ignored){ }
         try {
             unbindService(mServiceConnection);
-        } catch (IllegalArgumentException e) {
-            Log.d("MyLog", String.valueOf(e));
-        }
+        } catch (IllegalArgumentException ignored) { }
     }
 
     private void initParams() {
@@ -159,15 +149,15 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
     }
 
     private void initView(){
-       CircleImageView vkLogo = findViewById(R.id.vk_imageView);
-        CircleImageView instagramLogo = findViewById(R.id.instagram_imageView);
-        CircleImageView infoLogo = findViewById(R.id.info_imageView);
         control = findViewById(R.id.control_imageView);
+        mImageViewPulse = findViewById(R.id.main_pulse);
 
         if(jobService){
-            control.setImageResource(R.drawable.pause_button);
+            control.setImageResource(R.drawable.pause);
+            mImageViewPulse.setImageResource(R.drawable.pulse_on);
         } else {
-            control.setImageResource(R.drawable.play_button);
+            control.setImageResource(R.drawable.play);
+            mImageViewPulse.setImageResource(R.drawable.pulse);
         }
 
         currentTrack = findViewById(R.id.textView_current_track);
@@ -176,9 +166,6 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
         CircleImageView telegramLogo = findViewById(R.id.telegram_imageView);
         CircleImageView whatsAppLogo = findViewById(R.id.whatsapp_imageView);
         ExternalOnClickListener externalOnClickListener = new ExternalOnClickListener(mContext);
-        vkLogo.setOnClickListener(externalOnClickListener);
-        instagramLogo.setOnClickListener(externalOnClickListener);
-        infoLogo.setOnClickListener(externalOnClickListener);
         viberLogo.setOnClickListener(externalOnClickListener);
         telegramLogo.setOnClickListener(externalOnClickListener);
         whatsAppLogo.setOnClickListener(externalOnClickListener);
@@ -194,9 +181,11 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
                 if (state == null) return;
                 playing = state.getState() == PlaybackStateCompat.STATE_PLAYING;
                 if(playing) {
-                    control.setImageResource(R.drawable.pause_button);
+                    control.setImageResource(R.drawable.pause);
+                    mImageViewPulse.setImageResource(R.drawable.pulse_on);
                 } else {
-                    control.setImageResource(R.drawable.play_button);
+                    control.setImageResource(R.drawable.play);
+                    mImageViewPulse.setImageResource(R.drawable.pulse);
                 }
             }
         };
@@ -205,13 +194,9 @@ public class MainActivity extends AppCompatActivity implements SongCallBack, Vie
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 playerServiceBinder = (PlayerRadioService.PlayerServiceBinder) service;
-                try {
-                    mediaController = new MediaControllerCompat(MainActivity.this, playerServiceBinder.getMediaSessionToken());
-                    mediaController.registerCallback(callback);
-                    callback.onPlaybackStateChanged(mediaController.getPlaybackState());
-                } catch (RemoteException e) {
-                    mediaController = null;
-                }
+                mediaController = new MediaControllerCompat(MainActivity.this, playerServiceBinder.getMediaSessionToken());
+                mediaController.registerCallback(callback);
+                callback.onPlaybackStateChanged(mediaController.getPlaybackState());
             }
 
             @Override
