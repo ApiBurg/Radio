@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#ffffff">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -68,25 +69,70 @@
             android:textColor="#9da3ad"
             android:textSize="14sp"/>
 
-        <Button
+        <TextView
+            android:id="@+id/info_buttonNumberLive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="8362) 63-00-88"
+            android:text="(8362) 63-00-88"
             android:layout_marginTop="6dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            style="@style/MyButtonStyleGray"
-            android:textColor="#676767"
+            android:paddingLeft="47dp"
+            android:paddingRight="47dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textColor="@drawable/button_color"
+            android:textSize="18sp"
             android:background="@drawable/button_main"/>
 
+        <TextView
+            android:id="@+id/info_addDep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/advertising_department"
+            android:layout_marginTop="18dp"
+            android:layout_gravity="center"
+            android:textColor="#9da3ad"
+            android:textSize="14sp"/>
 
-        <Button
+        <TextView
+            android:id="@+id/info_buttonAvertising"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Редакция\n(8362) 42-69-26"
-            android:layout_marginTop="8dp"/>
+            android:text="(8362) 42-28-28"
+            android:layout_marginTop="6dp"
+            android:paddingLeft="47dp"
+            android:paddingRight="47dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textColor="@drawable/button_color"
+            android:textSize="18sp"
+            android:background="@drawable/button_main"/>
+
+        <TextView
+            android:id="@+id/info_edition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edition"
+            android:layout_marginTop="18dp"
+            android:layout_gravity="center"
+            android:textColor="#9da3ad"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/info_buttonEdition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="(8362) 42-69-26"
+            android:layout_marginTop="6dp"
+            android:paddingLeft="47dp"
+            android:paddingRight="47dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textColor="@drawable/button_color"
+            android:textSize="18sp"
+            android:background="@drawable/button_main"/>
 
         <ImageView
             android:layout_width="18dp"
@@ -97,13 +143,14 @@
             android:layout_marginTop="33dp"/>
 
         <TextView
+            android:id="@+id/info_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAlignment="center"
             android:textSize="14sp"
             android:textColor="#1D2D3D"
-            android:paddingTop="2dp"
+            android:paddingTop="7dp"
             android:textStyle="bold"
             android:text="fm@puls-radio.ru"/>
 
@@ -113,29 +160,32 @@
             android:src="@drawable/location_icon"
             android:contentDescription="@null"
             android:layout_gravity="center"
-            android:layout_marginTop="22dp"/>
+            android:layout_marginTop="32dp"/>
 
         <TextView
+            android:id="@+id/info_locationName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAlignment="center"
             android:textSize="14sp"
-            android:textColor="#1D2D3D"
-            android:paddingTop="2dp"
+            android:textColor="@drawable/button_color"
+            android:paddingTop="7dp"
             android:textStyle="bold"
             android:text="Республика Марий Эл г. Йошкар-Ола,\n Бульвар победы 15а"/>
 
         <TextView
+            android:id="@+id/info_linkSite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAlignment="center"
             android:textSize="18sp"
-            android:textColor="#5498FF"
+            android:textColor="@drawable/color_blue"
             android:paddingTop="32dp"
             android:textStyle="bold"
-            android:text="www.puls-radio.ru"/>
+            android:text="www.puls-radio.ru"
+            android:layout_marginBottom="39dp"/>
 
     </LinearLayout>
 

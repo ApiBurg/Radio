@@ -6,13 +6,20 @@
     android:layout_height="match_parent">
 
 
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <ImageView
         android:id="@+id/logo_imageView"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:src="@drawable/logo"
         android:contentDescription="@null"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="25dp"
         android:layout_marginLeft="80dp"
         android:layout_marginRight="80dp"
         android:scaleType="centerCrop"/>
@@ -21,7 +28,7 @@
         android:id="@+id/player_pulse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="170dp"
+        android:layout_marginTop="180dp"
         android:contentDescription="@null"
         android:src="@drawable/pulse_on"
         android:scaleType="fitXY"
@@ -31,7 +38,7 @@
         android:id="@+id/player_control"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="149dp"
+        android:layout_marginTop="129dp"
         android:layout_centerHorizontal="true"
         android:src="@drawable/play" />
 
@@ -58,23 +65,33 @@
         android:textColor="#676767"
         android:textSize="14sp"
         android:layout_below="@id/player_playTime"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        />
 
-    <Button
+
+    <TextView
         android:id="@+id/player_buttonLive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Трансляции"
+        android:paddingLeft="47dp"
+        android:paddingRight="47dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:textColor="@drawable/button_color"
+        android:textSize="18sp"
+        android:background="@drawable/button_main"
         android:layout_below="@id/textView_current_track"
         android:layout_marginTop="26dp"
-        android:layout_centerHorizontal="true"
-        android:text="Трансляции" />
+        android:layout_centerHorizontal="true"/>
 
     <LinearLayout
         android:id="@+id/player_social_one"
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="32dp"
         android:layout_below="@id/player_buttonLive">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -104,7 +121,7 @@
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="23dp"
         android:layout_below="@id/player_social_one">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -128,6 +145,11 @@
             android:src="@drawable/telegram"/>
 
     </LinearLayout>
+
+    </RelativeLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
 
 
 

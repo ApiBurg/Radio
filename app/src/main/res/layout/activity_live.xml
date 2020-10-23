@@ -27,4 +27,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/live_appBarLayout"/>
 
+    <ProgressBar
+        android:id="@+id/live_progressBar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerInParent="true"/>
+
 </RelativeLayout>

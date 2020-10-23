@@ -13,11 +13,10 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
+import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,16 +28,16 @@ import androidx.fragment.app.Fragment;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.Live;
-import com.vadimfedchuk1994gmail.radio.MainActivity;
 import com.vadimfedchuk1994gmail.radio.R;
-import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
-import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
 import com.vadimfedchuk1994gmail.radio.service.PlayerRadioService;
+import com.vadimfedchuk1994gmail.radio.utils.StringFormatter;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import java.util.Timer;
 
 import cz.msebera.android.httpclient.Header;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -61,6 +60,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private boolean playing;
     private PowerManager.WakeLock wakeLock;
+    private String utf8String = "";
 
 
     @Override
@@ -101,7 +101,8 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
         mPlayTime.setText(playTimeString);
         mCurrentTrack.setText(playMusicNameString);
 
-        Button mButtonStartActivityLive = view.findViewById(R.id.player_buttonLive);
+        TextView mButtonStartActivityLive = view.findViewById(R.id.player_buttonLive);
+        mButtonStartActivityLive.setTypeface(geometriaFace);
         mButtonStartActivityLive.setOnClickListener(this);
 
         initParams();
@@ -253,7 +254,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
                     getActivity().runOnUiThread(this::getMusicPlay);
                 }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(20000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -268,7 +269,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String response = new String(responseBody);
                 String[] play = response.split(";");
-                String playMusic = new String(play[1].getBytes(), StandardCharsets.UTF_8).trim();
+                String playMusic = play[1].trim();
                 if(isVisibilityFragment){
                     mPlayTime.setText(String.valueOf(play[0]));
                     mCurrentTrack.setText(playMusic);

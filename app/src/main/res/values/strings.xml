@@ -41,11 +41,13 @@
 
     <string name="playlist">Плейлист</string>
     <string name="live">Трансляции</string>
-    <string name="radio_name">ООО "Пульс-Радио"</string>
+    <string name="radio_name">ООО «Пульс-Радио»</string>
     <string name="location_name">Город вещания: Йошкар-Ола</string>
     <string name="fm">Частота вещания: 103,8 FM</string>
     <string name="license">Радиокалан "Пульс–Радио"\nСМИ Эл №ТУ12–00201 от 25.12.2015г.</string>
     <string name="live_two">Прямой эфир</string>
+    <string name="edition">Редакция</string>
+    <string name="advertising_department">Отдел рекламы</string>
 </resources>
 
 

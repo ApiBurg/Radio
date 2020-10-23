@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "364463265255",
+    "firebase_url": "https://puls-radio-notifications.firebaseio.com",
+    "project_id": "puls-radio-notifications",
+    "storage_bucket": "puls-radio-notifications.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364463265255:android:a1413c644bcf17e36f5942",
+        "android_client_info": {
+          "package_name": "com.vadimfedchuk1994gmail.radio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364463265255-l9jitpca56cdorp2ac42lds2nna1l600.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwMgV40ZAb5VDPp6EIFlB9XlTZp_yIVgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364463265255-l9jitpca56cdorp2ac42lds2nna1l600.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "364463265255-fm4hji02cj41jjemfiu428d7l36pqt0d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ru.GrigoriyTrokhimets.PulseRadio",
+                "app_store_id": "1508006120"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
