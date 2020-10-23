@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/action_map"
-        android:icon="@android:drawable/ic_dialog_map"
+        android:id="@+id/action_playlist"
+        android:icon="@drawable/ic_action_playlist"
         android:title="Плейлист"/>
     <item
-        android:id="@+id/action_dial"
-        android:icon="@android:drawable/ic_dialog_dialer"
+        android:id="@+id/action_play"
+        android:icon="@drawable/ic_action_play"
         android:title="Слушать" />
     <item
-        android:id="@+id/action_mail"
-        android:icon="@android:drawable/ic_dialog_email"
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_action_info"
         android:title="О нас" />
 </menu>

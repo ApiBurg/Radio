@@ -14,4 +14,9 @@
         <item name="colorControlNormal">#000000</item>
     </style>
 
+    <style name="MyButtonStyleGray" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">#676767</item>
+        <item name="android:background">#FDFDFD</item>
+    </style>
+
 </resources>

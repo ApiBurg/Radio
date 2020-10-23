@@ -38,4 +38,26 @@
     <string name="notification_channel_name" translatable="false">Player controls</string>
     <string name="stream_url" translatable="false">"http://178.208.85.117:8000/puls"</string>
     <string name="loading" translatable="false">Подключение к сервису! Подождите пожалуйста</string>
+
+    <string name="playlist">Плейлист</string>
+    <string name="live">Трансляции</string>
+    <string name="radio_name">ООО "Пульс-Радио"</string>
+    <string name="location_name">Город вещания: Йошкар-Ола</string>
+    <string name="fm">Частота вещания: 103,8 FM</string>
+    <string name="license">Радиокалан "Пульс–Радио"\nСМИ Эл №ТУ12–00201 от 25.12.2015г.</string>
+    <string name="live_two">Прямой эфир</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

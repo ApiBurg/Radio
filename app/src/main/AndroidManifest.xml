@@ -5,8 +5,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -32,7 +32,11 @@
             android:name=".ApplicationInfo"
             android:screenOrientation="portrait" />
 
-        <receiver android:name="androidx.media.session.MediaButtonReceiver" >
+        <activity
+            android:name=".Live"
+            android:screenOrientation="portrait" />
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
@@ -45,7 +49,6 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>
