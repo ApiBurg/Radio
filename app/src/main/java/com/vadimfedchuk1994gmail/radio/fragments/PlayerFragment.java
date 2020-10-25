@@ -1,19 +1,21 @@
 package com.vadimfedchuk1994gmail.radio.fragments;
 
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -29,15 +32,8 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.Live;
 import com.vadimfedchuk1994gmail.radio.R;
+import com.vadimfedchuk1994gmail.radio.intarfaces.SelectFragmentCallBack;
 import com.vadimfedchuk1994gmail.radio.service.PlayerRadioService;
-import com.vadimfedchuk1994gmail.radio.utils.StringFormatter;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 import cz.msebera.android.httpclient.Header;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -53,6 +49,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
     private CircleImageView mPlayerControl;
     private ImageView mPulseImageView;
     private TextView mPlayTime, mCurrentTrack;
+    private SelectFragmentCallBack selectFragmentCallBack;
 
     private MediaControllerCompat mediaController;
     private MediaControllerCompat.Callback callback;
@@ -60,7 +57,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private boolean playing;
     private PowerManager.WakeLock wakeLock;
-    private String utf8String = "";
+
+    public PlayerFragment(SelectFragmentCallBack selectFragmentCallBack){
+        this.selectFragmentCallBack = selectFragmentCallBack;
+    }
 
 
     @Override
@@ -104,6 +104,20 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
         TextView mButtonStartActivityLive = view.findViewById(R.id.player_buttonLive);
         mButtonStartActivityLive.setTypeface(geometriaFace);
         mButtonStartActivityLive.setOnClickListener(this);
+
+        CircleImageView mInfoIcon = view.findViewById(R.id.player_info);
+        CircleImageView mVkIcon = view.findViewById(R.id.player_vk);
+        CircleImageView mInstagramIcon = view.findViewById(R.id.player_instagram);
+        CircleImageView mWhatsappIcon = view.findViewById(R.id.player_whatsapp);
+        CircleImageView mViberIcon = view.findViewById(R.id.player_viber);
+        CircleImageView mTelegramIcon = view.findViewById(R.id.player_telegram);
+
+        mInfoIcon.setOnClickListener(this);
+        mVkIcon.setOnClickListener(this);
+        mInstagramIcon.setOnClickListener(this);
+        mWhatsappIcon.setOnClickListener(this);
+        mViberIcon.setOnClickListener(this);
+        mTelegramIcon.setOnClickListener(this);
 
         initParams();
         lock();
@@ -169,6 +183,54 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
             case R.id.player_buttonLive:
                 Intent liveIntent = new Intent(mContext, Live.class);
                 startActivity(liveIntent);
+                break;
+
+            case R.id.player_info:
+                selectFragmentCallBack.selectFragmentCallBack(3);
+                break;
+
+            case R.id.player_vk:
+                Intent vkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://vk.com/yolapulsradio"));
+                mContext.startActivity(vkIntent);
+                break;
+
+            case R.id.player_instagram:
+                Intent instagramIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/_u/pulsradio_yo"));
+                mContext.startActivity(instagramIntent);
+                break;
+
+            case R.id.player_whatsapp:
+                Intent whatsAppIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://api.whatsapp.com/send?phone=+79177112525"));
+                mContext.startActivity(whatsAppIntent);
+                break;
+
+            case R.id.player_viber:
+                try {
+                    String number = "+79177112525";
+                    Uri uri = Uri.parse("tel:" + Uri.encode(number));
+                    Intent viberIntent = new Intent("android.intent.action.VIEW");
+                    viberIntent.setClassName("com.viber.voip", "com.viber.voip.WelcomeActivity");
+                    viberIntent.setData(uri);
+                    mContext.startActivity(viberIntent);
+                } catch (ActivityNotFoundException e) {
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                    alertDialog.setTitle(R.string.error).setMessage(R.string.viber_not_found)
+                            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.cancel());
+                    alertDialog.show();
+                }
+                break;
+
+            case R.id.player_telegram:
+                try {
+                    Intent telegramIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=puls_radio_yo"));
+                    mContext.startActivity(telegramIntent);
+                } catch (ActivityNotFoundException e) {
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                    alertDialog.setTitle(R.string.error).setMessage(R.string.telegram_not_found)
+                            .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.cancel());
+                    alertDialog.show();
+                }
                 break;
         }
     }

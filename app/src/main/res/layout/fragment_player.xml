@@ -95,24 +95,30 @@
         android:layout_below="@id/player_buttonLive">
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_info"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
             android:layout_marginRight="61.44dp"
-            android:src="@drawable/icon_info"/>
+            android:src="@drawable/icon_info"
+            android:background="?selectableItemBackgroundBorderless"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_vk"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
             android:src="@drawable/vk"
-            android:layout_marginRight="61.44dp"/>
+            android:layout_marginRight="61.44dp"
+            android:background="?selectableItemBackgroundBorderless"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_instagram"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
-            android:src="@drawable/instagram"/>
+            android:src="@drawable/instagram"
+            android:background="?selectableItemBackgroundBorderless"/>
 
     </LinearLayout>
 
@@ -125,24 +131,30 @@
         android:layout_below="@id/player_social_one">
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_whatsapp"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
             android:layout_marginRight="61.44dp"
-            android:src="@drawable/whatsapp"/>
+            android:src="@drawable/whatsapp"
+            android:background="?selectableItemBackgroundBorderless"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_viber"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
             android:src="@drawable/viber"
-            android:layout_marginRight="61.44dp"/>
+            android:layout_marginRight="61.44dp"
+            android:background="?selectableItemBackgroundBorderless"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/player_telegram"
             android:layout_width="36.48dp"
             android:layout_height="36.48dp"
             android:layout_weight="1"
-            android:src="@drawable/telegram"/>
+            android:src="@drawable/telegram"
+            android:background="?selectableItemBackgroundBorderless"/>
 
     </LinearLayout>
 

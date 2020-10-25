@@ -15,25 +15,38 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
+import com.vadimfedchuk1994gmail.radio.intarfaces.SelectFragmentCallBack;
 
 public class MainActivity extends AppCompatActivity implements
-        BottomNavigationView.OnNavigationItemSelectedListener {
+        BottomNavigationView.OnNavigationItemSelectedListener, SelectFragmentCallBack {
 
+    private SelectFragmentCallBack selectFragmentCallBack;
     private Fragment mPlayerFragment, mPlayListFragment, mInfoFragment;
+    private BottomNavigationView mBottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initParams();
         initView();
+    }
+
+    @Override
+    public void selectFragmentCallBack(int position) {
+        selectFragment();
+    }
+
+    private void initParams() {
+        selectFragmentCallBack = this;
         FirebaseMessaging.getInstance().unsubscribeFromTopic("translation");
     }
 
     private void initView() {
-        BottomNavigationView mBottomNavigationView = findViewById(R.id.main_bottomNavigationView);
+        mBottomNavigationView = findViewById(R.id.main_bottomNavigationView);
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
-        mPlayerFragment = new PlayerFragment();
+        mPlayerFragment = new PlayerFragment(selectFragmentCallBack);
         mPlayListFragment = new PlayListFragment();
         mInfoFragment = new InfoFragment();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -59,5 +72,12 @@ public class MainActivity extends AppCompatActivity implements
         }
         mFragmentTransaction.commit();
         return true;
+    }
+
+    public void selectFragment(){
+        mBottomNavigationView.setSelectedItemId(R.id.action_info);
+        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
+        mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+        mFragmentTransaction.commit();
     }
 }
