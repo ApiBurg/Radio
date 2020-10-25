@@ -128,7 +128,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
         isVisibilityFragment = true;
-        updatePlayTrack();
+        //updatePlayTrack();
     }
 
     @Override

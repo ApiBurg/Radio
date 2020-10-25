@@ -30,10 +30,6 @@
         </activity>
 
         <activity
-            android:name=".ApplicationInfo"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".Live"
             android:screenOrientation="portrait" />
 
