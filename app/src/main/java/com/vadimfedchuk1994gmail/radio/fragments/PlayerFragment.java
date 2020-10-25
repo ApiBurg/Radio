@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,8 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private boolean isResponsePlay = false;
     private String playName, playTime;
     private MyServiceRunning myServiceRunning;
+    private ServiceConnection mServiceConnection;
+    private Timer timer;
 
 
     public PlayerFragment(FragmentSelectCallBack selectFragmentCallBack){
@@ -66,6 +69,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         super.onCreate(savedInstanceState);
         mContext = getContext();
         myServiceRunning = new MyServiceRunning(mContext);
+        if(myServiceRunning.isMyServiceRunning()){ startServicePlayRadio(); }
     }
 
     @Nullable
@@ -89,8 +93,8 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                     mPulseImageView.setImageResource(R.drawable.pulse);
                 }
             } else {
-                mPlayerControl.setImageResource(R.drawable.play);
-                mPulseImageView.setImageResource(R.drawable.pulse);
+                mPlayerControl.setImageResource(R.drawable.pause);
+                mPulseImageView.setImageResource(R.drawable.pulse_on);
             }
         } else {
             mPlayerControl.setImageResource(R.drawable.play);
@@ -121,14 +125,12 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         CircleImageView mWhatsappIcon = view.findViewById(R.id.player_whatsapp);
         CircleImageView mViberIcon = view.findViewById(R.id.player_viber);
         CircleImageView mTelegramIcon = view.findViewById(R.id.player_telegram);
-
         mInfoIcon.setOnClickListener(this);
         mVkIcon.setOnClickListener(this);
         mInstagramIcon.setOnClickListener(this);
         mWhatsappIcon.setOnClickListener(this);
         mViberIcon.setOnClickListener(this);
         mTelegramIcon.setOnClickListener(this);
-
         initParams();
         return view;
     }
@@ -143,6 +145,38 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onPause() {
         super.onPause();
         getPlaySong.stop();
+        timer.cancel();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        timer.cancel();
+        if(!playing & !myServiceRunning.isMyServiceRunning()) {
+            if(mediaController == null) return;
+            mediaController.getTransportControls().stop();
+            try {
+                if(getActivity() != null){
+                    getActivity().unbindService(mServiceConnection);
+                    getActivity().stopService(new Intent(mContext, PlayerRadioService.class));
+                }
+            } catch (IllegalArgumentException e) {
+                Log.d("MyLog", String.valueOf(e));
+            }
+        }
+
+        playerServiceBinder = null;
+        if (mediaController != null) {
+            mediaController.unregisterCallback(callback);
+            mediaController = null;
+        }
+
+
+        try {
+            if(getActivity() != null) getActivity().unbindService(mServiceConnection);
+        } catch (IllegalArgumentException e) {
+            Log.d("MyLog", String.valueOf(e));
+        }
     }
 
     @Override
@@ -152,13 +186,6 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         this.playTime = playTime;
         this.playName = songName;
         if(!isResponsePlay) isResponsePlay = true;
-    }
-
-    private void initParams() {
-        SongCallBack songCallBack = this;
-        getPlaySong = new GetPlaySong(songCallBack);
-        Timer timer = new Timer();
-        timer.schedule(getPlaySong, 0, 5000);
     }
 
     @Override
@@ -246,15 +273,21 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         }
     }
 
+    private void initParams() {
+        SongCallBack songCallBack = this;
+        getPlaySong = new GetPlaySong(songCallBack);
+        timer = new Timer();
+        timer.schedule(getPlaySong, 0, 5000);
+    }
+
     private void startServicePlayRadio() {
         Activity activity =  getActivity();
         Intent intent = new Intent(getActivity(), PlayerRadioService.class);
         ContextCompat.startForegroundService(mContext, intent);
-
         callback = new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
-                if (state == null) return;
+                if(state == null) return;;
                 playing = state.getState() == PlaybackStateCompat.STATE_PLAYING;
                 if(playing) {
                     mPlayerControl.setImageResource(R.drawable.pause);
@@ -266,7 +299,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             }
         };
 
-        ServiceConnection mServiceConnection = new ServiceConnection() {
+        mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 playerServiceBinder = (PlayerRadioService.PlayerServiceBinder) service;
