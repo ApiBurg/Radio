@@ -1,19 +1,15 @@
 package com.vadimfedchuk1994gmail.radio.fragments;
 
-import android.app.ActivityManager;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -29,11 +25,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.Live;
 import com.vadimfedchuk1994gmail.radio.R;
-import com.vadimfedchuk1994gmail.radio.intarfaces.SelectFragmentCallBack;
+import com.vadimfedchuk1994gmail.radio.intarfaces.MediaPlayerCallBack;
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
 import com.vadimfedchuk1994gmail.radio.service.PlayerRadioService;
@@ -41,38 +35,31 @@ import com.vadimfedchuk1994gmail.radio.utils.MyServiceRunning;
 
 import java.util.Timer;
 
-import cz.msebera.android.httpclient.Header;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.Context.BIND_AUTO_CREATE;
-import static android.content.Context.MODE_PRIVATE;
 
 public class PlayerFragment extends Fragment implements View.OnClickListener, SongCallBack {
 
     private Context mContext;
-    private boolean jobService = false;
     private CircleImageView mPlayerControl;
     private ImageView mPulseImageView;
     private TextView mPlayTime, mCurrentTrack;
-    private SelectFragmentCallBack selectFragmentCallBack;
+    private MediaPlayerCallBack selectFragmentCallBack;
 
     private MediaControllerCompat mediaController;
     private MediaControllerCompat.Callback callback;
-    private ServiceConnection mServiceConnection;
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private boolean playing;
 
 
     private GetPlaySong getPlaySong;
-    private Timer timer;
     private boolean isResponsePlay = false;
     private String playName, playTime;
-
-
     private MyServiceRunning myServiceRunning;
 
 
-    public PlayerFragment(SelectFragmentCallBack selectFragmentCallBack){
+    public PlayerFragment(MediaPlayerCallBack selectFragmentCallBack){
         this.selectFragmentCallBack = selectFragmentCallBack;
     }
 
@@ -81,6 +68,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getContext();
+        myServiceRunning = new MyServiceRunning(mContext);
     }
 
     @Nullable
@@ -94,9 +82,19 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         mPlayerControl = view.findViewById(R.id.player_control);
         mPlayerControl.setOnClickListener(this);
 
-        if(jobService){
-            mPlayerControl.setImageResource(R.drawable.pause);
-            mPulseImageView.setImageResource(R.drawable.pulse_on);
+        if(myServiceRunning.isMyServiceRunning()){
+            if (mediaController != null){
+                if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
+                    mPlayerControl.setImageResource(R.drawable.pause);
+                    mPulseImageView.setImageResource(R.drawable.pulse_on);
+                } else {
+                    mPlayerControl.setImageResource(R.drawable.play);
+                    mPulseImageView.setImageResource(R.drawable.pulse);
+                }
+            } else {
+                mPlayerControl.setImageResource(R.drawable.play);
+                mPulseImageView.setImageResource(R.drawable.pulse);
+            }
         } else {
             mPlayerControl.setImageResource(R.drawable.play);
             mPulseImageView.setImageResource(R.drawable.pulse);
@@ -142,12 +140,14 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onResume() {
         super.onResume();
         getPlaySong.play();
+        if(mediaController != null)  Log.d("MyLog", "getPlaybackState: "+mediaController.getPlaybackState().getState());
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getPlaySong.stop();
+        if(mediaController != null)  Log.d("MyLog", "getPlaybackState: "+mediaController.getPlaybackState().getState());
     }
 
     @Override
@@ -155,39 +155,6 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         super.onStop();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if(!playing & !jobService) {
-            if(mediaController == null) return;
-            mediaController.getTransportControls().stop();
-            try {
-                if(getActivity() != null){
-                    getActivity().unbindService(mServiceConnection);
-                    getActivity().stopService(new Intent(mContext, PlayerRadioService.class));
-                }
-            } catch (IllegalArgumentException e) {
-                Log.d("MyLog", String.valueOf(e));
-            }
-        }
-
-        playerServiceBinder = null;
-        if (mediaController != null) {
-            mediaController.unregisterCallback(callback);
-            mediaController = null;
-        }
-
-        getPlaySong.stop();
-        timer.cancel();
-
-        try {
-            if(getActivity() != null) {
-                getActivity().unbindService(mServiceConnection);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.d("MyLog", String.valueOf(e));
-        }
-    }
 
     @Override
     public void songCallBack(String songName, String playTime, boolean state) {
@@ -199,11 +166,9 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     }
 
     private void initParams() {
-        MyServiceRunning myServiceRunning = new MyServiceRunning(mContext);
-        jobService = myServiceRunning.isMyServiceRunning();
         SongCallBack songCallBack = this;
         getPlaySong = new GetPlaySong(songCallBack);
-        timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(getPlaySong, 0, 5000);
     }
 
@@ -293,8 +258,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     }
 
     private void startServicePlayRadio() {
-        Intent intent = new Intent(mContext, PlayerRadioService.class);
+        Activity activity =  getActivity();
+        Intent intent = new Intent(getActivity(), PlayerRadioService.class);
         ContextCompat.startForegroundService(mContext, intent);
+
         callback = new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -310,7 +277,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             }
         };
 
-        mServiceConnection = new ServiceConnection() {
+        ServiceConnection mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 playerServiceBinder = (PlayerRadioService.PlayerServiceBinder) service;
@@ -329,8 +296,8 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             }
         };
 
-        if(getActivity() != null){
-            getActivity().bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+        if(activity != null){
+            activity.bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
         }
     }
 

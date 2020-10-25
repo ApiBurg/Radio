@@ -1,5 +1,5 @@
 package com.vadimfedchuk1994gmail.radio.intarfaces;
 
-public interface SelectFragmentCallBack {
+public interface MediaPlayerCallBack {
     void selectFragmentCallBack(int position);
 }
