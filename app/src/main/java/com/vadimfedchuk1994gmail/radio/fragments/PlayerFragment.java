@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.vadimfedchuk1994gmail.radio.Live;
+import com.vadimfedchuk1994gmail.radio.LiveVk;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.intarfaces.FragmentSelectCallBack;
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
@@ -51,8 +50,6 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private MediaControllerCompat.Callback callback;
     private PlayerRadioService.PlayerServiceBinder playerServiceBinder;
     private boolean playing;
-
-
     private GetPlaySong getPlaySong;
     private boolean isResponsePlay = false;
     private String playName, playTime;
@@ -140,21 +137,13 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onResume() {
         super.onResume();
         getPlaySong.play();
-        if(mediaController != null)  Log.d("MyLog", "getPlaybackState: "+mediaController.getPlaybackState().getState());
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getPlaySong.stop();
-        if(mediaController != null)  Log.d("MyLog", "getPlaybackState: "+mediaController.getPlaybackState().getState());
     }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
 
     @Override
     public void songCallBack(String songName, String playTime, boolean state) {
@@ -203,7 +192,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 break;
 
             case R.id.player_buttonLive:
-                Intent liveIntent = new Intent(mContext, Live.class);
+                Intent liveIntent = new Intent(mContext, LiveVk.class);
                 startActivity(liveIntent);
                 break;
 

@@ -22,7 +22,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         SharedPreferences sPref = getSharedPreferences("AppDB", MODE_PRIVATE);
         int notification = sPref.getInt("NOTIFICATION", 0);
         if(notification == 0) createNotificationChannel();
-        Intent notificationIntent = new Intent(this, Live.class);
+        Intent notificationIntent = new Intent(this, LiveVk.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this,"1")
                 .setSmallIcon(R.drawable.ic_action_notification)

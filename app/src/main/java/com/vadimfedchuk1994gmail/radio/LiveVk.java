@@ -14,7 +14,7 @@ import android.widget.ProgressBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class Live extends AppCompatActivity {
+public class LiveVk extends AppCompatActivity {
 
     private boolean isInitView = false;
     private ProgressBar mProgressBar;

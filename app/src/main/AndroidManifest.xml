@@ -30,7 +30,7 @@
         </activity>
 
         <activity
-            android:name=".Live"
+            android:name=".LiveVk"
             android:screenOrientation="portrait" />
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver">
