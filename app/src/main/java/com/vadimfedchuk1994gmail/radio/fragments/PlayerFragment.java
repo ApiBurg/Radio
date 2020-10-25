@@ -27,7 +27,7 @@ import androidx.fragment.app.Fragment;
 
 import com.vadimfedchuk1994gmail.radio.Live;
 import com.vadimfedchuk1994gmail.radio.R;
-import com.vadimfedchuk1994gmail.radio.intarfaces.MediaPlayerCallBack;
+import com.vadimfedchuk1994gmail.radio.intarfaces.FragmentSelectCallBack;
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
 import com.vadimfedchuk1994gmail.radio.service.PlayerRadioService;
@@ -45,7 +45,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private CircleImageView mPlayerControl;
     private ImageView mPulseImageView;
     private TextView mPlayTime, mCurrentTrack;
-    private MediaPlayerCallBack selectFragmentCallBack;
+    private FragmentSelectCallBack selectFragmentCallBack;
 
     private MediaControllerCompat mediaController;
     private MediaControllerCompat.Callback callback;
@@ -59,7 +59,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private MyServiceRunning myServiceRunning;
 
 
-    public PlayerFragment(MediaPlayerCallBack selectFragmentCallBack){
+    public PlayerFragment(FragmentSelectCallBack selectFragmentCallBack){
         this.selectFragmentCallBack = selectFragmentCallBack;
     }
 

@@ -2,21 +2,14 @@
 
 package com.vadimfedchuk1994gmail.radio;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -25,13 +18,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
-import com.vadimfedchuk1994gmail.radio.intarfaces.MediaPlayerCallBack;
-import com.vadimfedchuk1994gmail.radio.service.PlayerRadioService;
+import com.vadimfedchuk1994gmail.radio.intarfaces.FragmentSelectCallBack;
 
 public class MainActivity extends AppCompatActivity implements
-        BottomNavigationView.OnNavigationItemSelectedListener, MediaPlayerCallBack {
+        BottomNavigationView.OnNavigationItemSelectedListener, FragmentSelectCallBack {
 
-    private MediaPlayerCallBack mediaPlayerCallBack;
+    private FragmentSelectCallBack fragmentSelectCallBack;
     private Fragment mPlayerFragment, mPlayListFragment, mInfoFragment;
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
@@ -57,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initParams() {
-        mediaPlayerCallBack = this;
+        fragmentSelectCallBack = this;
         FirebaseMessaging.getInstance().unsubscribeFromTopic("translation");
     }
 
@@ -65,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView = findViewById(R.id.main_bottomNavigationView);
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
-        mPlayerFragment = new PlayerFragment(mediaPlayerCallBack);
+        mPlayerFragment = new PlayerFragment(fragmentSelectCallBack);
         mPlayListFragment = new PlayListFragment();
         mInfoFragment = new InfoFragment();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
