@@ -31,7 +31,7 @@ public class GetPlaySong extends TimerTask {
 
     @Override
     public void run() {
-        if(!job) return;
+        if (!job) return;
         URL url = null;
         String text = null;
         try {
@@ -48,26 +48,21 @@ public class GetPlaySong extends TimerTask {
             e.printStackTrace();
         }
 
-        if(text != null){
+        if (text != null) {
             try {
                 String song = text.substring(6).trim();
                 String response = song.substring(0, song.length() - 3);
-                Log.d("MyLog", response);
-                if(controlSong != null ){
-                    if(controlSong.length() != response.length() & job){
-                        callBack.songCallBack(response, true);
-                        controlSong = response;
-                    }
-                } else {
-                    if(job)  {
-                        callBack.songCallBack(response, true);
-                        controlSong = response;
-                    }
+
+                String[] play = text.split(";");
+                String playTime = play[0].trim();
+                String playName = play[1].trim();
+
+                if(job){
+                    callBack.songCallBack(playName, playTime, true);
                 }
-            } catch (RuntimeException e){
-                if(job) callBack.songCallBack("Получение композиции...", true);
-            }
+            } catch (RuntimeException ignored){ }
         }
+
     }
 
 }
