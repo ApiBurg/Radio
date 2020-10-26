@@ -18,6 +18,8 @@ public class LiveVk extends AppCompatActivity {
 
     private boolean isInitView = false;
     private ProgressBar mProgressBar;
+    private WebView mWebView;
+    private boolean isNetwork;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,7 @@ public class LiveVk extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initView() {
-        WebView mWebView = findViewById(R.id.live_webView);
+        mWebView = findViewById(R.id.live_webView);
         mWebView.setVisibility(View.GONE);
         mProgressBar = findViewById(R.id.live_progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -74,7 +76,31 @@ public class LiveVk extends AppCompatActivity {
                 }
             });
             mWebView.loadUrl("https://m.vk.com/videos-21699335");
+        } else {
+            expectationConnectionsNetwork();
         }
+    }
+
+    private void expectationConnectionsNetwork() {
+        isNetwork = false;
+        mProgressBar.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!isNetwork) {
+                    if(isOnline()){
+                        isNetwork = true;
+                        runOnUiThread(() -> initView());
+                    } else {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
     }
 
     private boolean isOnline() {
