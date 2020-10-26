@@ -34,6 +34,7 @@ public class LiveVk extends AppCompatActivity {
         if (!isInitView){
             isInitView = true;
             initView();
+            initWebView();
         }
     }
 
@@ -48,10 +49,13 @@ public class LiveVk extends AppCompatActivity {
     private void initView() {
         mWebView = findViewById(R.id.live_webView);
         mWebView.setVisibility(View.GONE);
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mProgressBar = findViewById(R.id.live_progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void initWebView() {
         if(isOnline()){
-            mWebView.getSettings().setJavaScriptEnabled(true);
             mWebView.setWebViewClient(new WebViewClient(){
 
                 public boolean shouldOverrideUrlLoading(WebView webView, String url) {
@@ -84,19 +88,16 @@ public class LiveVk extends AppCompatActivity {
     private void expectationConnectionsNetwork() {
         isNetwork = false;
         mProgressBar.setVisibility(View.VISIBLE);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!isNetwork) {
-                    if(isOnline()){
-                        isNetwork = true;
-                        runOnUiThread(() -> initView());
-                    } else {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+        new Thread(() -> {
+            while (!isNetwork) {
+                if(isOnline()){
+                    isNetwork = true;
+                    runOnUiThread(this::initWebView);
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
