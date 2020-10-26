@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -55,6 +56,11 @@ public class LiveVk extends AppCompatActivity {
     }
 
     private void initWebView() {
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(mWebView, true);
+        }else {
+            CookieManager.getInstance().setAcceptCookie(true);
+        }
         if(isOnline()){
             mWebView.setWebViewClient(new WebViewClient(){
 
