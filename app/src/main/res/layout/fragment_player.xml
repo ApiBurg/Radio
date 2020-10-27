@@ -7,7 +7,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="56dp">
 
     <ImageView
         android:id="@+id/logo_imageView"
@@ -17,14 +18,13 @@
         android:contentDescription="@null"
         android:layout_marginTop="25dp"
         android:layout_marginLeft="80dp"
-        android:layout_marginRight="80dp"
-        android:scaleType="centerCrop"/>
+        android:layout_marginRight="80dp" />
 
     <ImageView
         android:id="@+id/player_pulse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="145dp"
         android:contentDescription="@null"
         android:src="@drawable/pulse_on"
         android:scaleType="fitXY"
@@ -34,7 +34,7 @@
         android:id="@+id/player_control"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="129dp"
+        android:layout_marginTop="119dp"
         android:layout_centerHorizontal="true"
         android:src="@drawable/play" />
 
@@ -120,7 +120,7 @@
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:layout_below="@id/player_social_one">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -149,5 +149,11 @@
     </LinearLayout>
 
     </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#f5f5f5"
+        android:layout_alignParentBottom="true"></View>
 
 </RelativeLayout>
