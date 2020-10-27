@@ -51,6 +51,7 @@ public class LiveVk extends AppCompatActivity {
         mWebView = findViewById(R.id.live_webView);
         mWebView.setVisibility(View.GONE);
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setUseWideViewPort(true);
         mProgressBar = findViewById(R.id.live_progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
     }

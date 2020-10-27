@@ -46,7 +46,7 @@
         android:textAlignment="center"
         android:textSize="20sp"
         android:layout_below="@id/player_control"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:textColor="#676767" />
 
     <TextView
@@ -79,7 +79,7 @@
         android:textSize="18sp"
         android:background="@drawable/button_main"
         android:layout_below="@id/textView_current_track"
-        android:layout_marginTop="26dp"
+        android:layout_marginTop="20dp"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout
@@ -87,7 +87,7 @@
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="22dp"
         android:layout_below="@id/player_buttonLive">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -120,7 +120,7 @@
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="23dp"
+        android:layout_marginTop="16dp"
         android:layout_below="@id/player_social_one">
 
         <de.hdodenhof.circleimageview.CircleImageView
