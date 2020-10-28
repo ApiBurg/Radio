@@ -24,10 +24,7 @@ import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.adapters.PlayListAdapter;
 import com.vadimfedchuk1994gmail.radio.models.PlayListPOJO;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -39,6 +36,7 @@ public class PlayListFragment extends Fragment {
     private PlayListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
+    private boolean isVisibilityFragment = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,37 +73,46 @@ public class PlayListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        isVisibilityFragment = true;
         queryDataFromServer();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isVisibilityFragment = false;
     }
 
     private void queryDataFromServer() {
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://puls-radio.ru/playlist/", new AsyncHttpResponseHandler() {
+        client.get("http://mobile.puls-radio.ru/puls10.txt", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                startParserPlayList(responseBody);
+                String response = null;
+                try {
+                    response = new String(responseBody, "windows-1251");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                startParserPlayList(response);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
 
             }
-
         });
     }
 
-    private void startParserPlayList(byte[] responseBody) {
+    private void startParserPlayList(String response) {
         new Thread(() -> {
-            String response = new String(responseBody);
-            Document document = Jsoup.parse(response, "puls-radio.ru");
-            Elements elementsTrackName = document.select("div.track");
-            Elements elementsDate = document.select("div.d");
-            obj.clear();
-            for (int i = 0; i < elementsTrackName.size(); i++){
-                obj.add(new PlayListPOJO(elementsTrackName.get(i).text(), elementsDate.get(i).text()));
-                if(i == 50) break;
+            assert response != null;
+            String[] playListArray = response.split("\n");
+            for (String s : playListArray) {
+                String[] item = s.split(";");
+                obj.add(new PlayListPOJO(item[1], item[0]));
             }
-            if(getActivity() != null){
+            if(getActivity() != null & isVisibilityFragment){
                 getActivity().runOnUiThread(() -> {
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
@@ -116,3 +123,41 @@ public class PlayListFragment extends Fragment {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

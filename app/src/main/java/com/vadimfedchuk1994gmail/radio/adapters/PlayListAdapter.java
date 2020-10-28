@@ -5,6 +5,8 @@ package com.vadimfedchuk1994gmail.radio.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,15 +42,20 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull PlayListAdapter.ViewHolder holder, int position) {
+        String html = null;
         if(position == 0){
             holder.root.setBackgroundColor(Color.parseColor("#33cc66"));
-            holder.date.setTextColor(Color.parseColor("#000000"));
+            html = "<font color='#000000'>"+obj.get(position).getDate()+"</font> "+obj.get(position).getName();
         } else {
             holder.root.setBackgroundColor(Color.parseColor("#ffffff"));
-            holder.date.setTextColor(Color.parseColor("#9da3ad"));
+            html = "<font color='#9da3ad'>"+obj.get(position).getDate()+"</font> "+obj.get(position).getName();
         }
-        holder.date.setText(obj.get(position).getDate());
-        holder.name.setText(obj.get(position).getName());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+           holder.name.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.name.setText(Html.fromHtml(html));
+        }
     }
 
     @Override
@@ -59,17 +66,15 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         LinearLayout root;
-        TextView date, name;
+        TextView name;
         View separator;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             root = itemView.findViewById(R.id.itemPlayList_root);
-            date = itemView.findViewById(R.id.itemPlayList_date);
             name = itemView.findViewById(R.id.itemPlayList_name);
             separator = itemView.findViewById(R.id.itemPlayList_separator);
             Typeface geometriaFace = Typeface.createFromAsset(mContext.getAssets(), "geometria.ttf");
-            date.setTypeface(geometriaFace);
             name.setTypeface(geometriaFace);
             root.setOnClickListener(this);
         }
