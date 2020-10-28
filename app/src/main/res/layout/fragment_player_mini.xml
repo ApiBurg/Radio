@@ -9,12 +9,11 @@
     <ImageView
         android:id="@+id/logo_imageView"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:src="@drawable/logo"
+        android:layout_height="110dp"
         android:contentDescription="@null"
-        android:layout_marginTop="45dp"
-        android:layout_marginLeft="80dp"
-        android:layout_marginRight="80dp" />
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="55dp"
+        android:layout_marginRight="55dp" />
 
     <ImageView
         android:id="@+id/player_pulse"
@@ -73,7 +72,7 @@
         android:textSize="18sp"
         android:background="@drawable/button_main"
         android:layout_below="@id/textView_current_track"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="22dp"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout

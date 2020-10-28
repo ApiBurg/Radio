@@ -7,11 +7,11 @@
     <ImageView
         android:id="@+id/logo_imageView"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="120dp"
         android:contentDescription="@null"
-        android:layout_marginTop="55dp"
-        android:layout_marginLeft="80dp"
-        android:layout_marginRight="80dp" />
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="55dp"
+        android:layout_marginRight="55dp" />
 
     <ImageView
         android:id="@+id/player_pulse"
