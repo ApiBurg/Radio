@@ -67,9 +67,15 @@ public class PlayListFragment extends Fragment {
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        queryDataFromServer();
         mSwipeRefreshLayout.setOnRefreshListener(this::queryDataFromServer);
         return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        queryDataFromServer();
     }
 
     private void queryDataFromServer() {

@@ -2,5 +2,8 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">vk.com</domain>
+        <domain includeSubdomains="true">puls-radio.ru</domain>
+        <domain includeSubdomains="true">mobile.puls-radio.ru</domain>
+        <domain includeSubdomains="true">178.208.85.117</domain>
     </domain-config>
 </network-security-config>

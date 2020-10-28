@@ -86,10 +86,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void selectFragment(){
-        mBottomNavigationView.setSelectedItemId(R.id.action_info);
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+        mFragmentTransaction.add(R.id.main_container, mInfoFragment);
         mFragmentTransaction.commit();
+        mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
     private void lock() {

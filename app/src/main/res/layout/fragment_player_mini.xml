@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
 
     <ImageView
         android:id="@+id/logo_imageView"
@@ -10,7 +12,7 @@
         android:layout_height="80dp"
         android:src="@drawable/logo"
         android:contentDescription="@null"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="45dp"
         android:layout_marginLeft="80dp"
         android:layout_marginRight="80dp" />
 
@@ -18,20 +20,18 @@
         android:id="@+id/player_pulse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="46dp"
+        android:layout_marginTop="162dp"
         android:contentDescription="@null"
         android:scaleType="fitXY"
-        android:visibility="visible"
-        android:layout_below="@id/logo_imageView"/>
+        android:visibility="visible" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/player_control"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="139dp"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/play"
-        android:layout_below="@id/logo_imageView"/>
+        android:src="@drawable/play" />
 
     <TextView
         android:id="@+id/player_playTime"
@@ -41,7 +41,7 @@
         android:textAlignment="center"
         android:textSize="20sp"
         android:layout_below="@id/player_control"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="6dp"
         android:textColor="#676767" />
 
     <TextView
@@ -59,7 +59,6 @@
         android:textStyle="bold"
         />
 
-
     <TextView
         android:id="@+id/player_buttonLive"
         android:layout_width="wrap_content"
@@ -74,7 +73,7 @@
         android:textSize="18sp"
         android:background="@drawable/button_main"
         android:layout_below="@id/textView_current_track"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:layout_centerHorizontal="true"/>
 
     <LinearLayout
@@ -82,7 +81,7 @@
         android:layout_width="233dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="33dp"
         android:layout_below="@id/player_buttonLive">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -108,39 +107,39 @@
             android:layout_weight="1"
             android:src="@drawable/instagram" />
 
-    </LinearLayout>
+        </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/player_social_two"
-        android:layout_width="233dp"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="23dp"
-        android:layout_below="@id/player_social_one">
+        <LinearLayout
+            android:id="@+id/player_social_two"
+            android:layout_width="233dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:layout_below="@id/player_social_one">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/player_whatsapp"
-            android:layout_width="36.48dp"
-            android:layout_height="36.48dp"
-            android:layout_weight="1"
-            android:layout_marginRight="61.44dp"
-            android:src="@drawable/whatsapp" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/player_whatsapp"
+                android:layout_width="36.48dp"
+                android:layout_height="36.48dp"
+                android:layout_weight="1"
+                android:layout_marginRight="61.44dp"
+                android:src="@drawable/whatsapp" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/player_viber"
-            android:layout_width="36.48dp"
-            android:layout_height="36.48dp"
-            android:layout_weight="1"
-            android:src="@drawable/viber"
-            android:layout_marginRight="61.44dp" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/player_viber"
+                android:layout_width="36.48dp"
+                android:layout_height="36.48dp"
+                android:layout_weight="1"
+                android:src="@drawable/viber"
+                android:layout_marginRight="61.44dp" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/player_telegram"
-            android:layout_width="36.48dp"
-            android:layout_height="36.48dp"
-            android:layout_weight="1"
-            android:src="@drawable/telegram" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/player_telegram"
+                android:layout_width="36.48dp"
+                android:layout_height="36.48dp"
+                android:layout_weight="1"
+                android:src="@drawable/telegram" />
 
-    </LinearLayout>
+        </LinearLayout>
 
 </RelativeLayout>

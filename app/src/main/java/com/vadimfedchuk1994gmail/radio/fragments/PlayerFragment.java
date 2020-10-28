@@ -6,12 +6,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +28,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.squareup.picasso.Picasso;
 import com.vadimfedchuk1994gmail.radio.LiveVk;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.intarfaces.FragmentSelectCallBack;
@@ -57,7 +61,8 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private MyServiceRunning myServiceRunning;
     private ServiceConnection mServiceConnection;
     private Timer timer;
-
+    private double screenInches;
+    private SongCallBack songCallBack;
 
     public PlayerFragment(FragmentSelectCallBack selectFragmentCallBack){
         this.selectFragmentCallBack = selectFragmentCallBack;
@@ -68,18 +73,32 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getContext();
+        initParams();
         myServiceRunning = new MyServiceRunning(mContext);
         if(myServiceRunning.isMyServiceRunning()){ startServicePlayRadio(); }
+
+        DisplayMetrics dm = new DisplayMetrics();
+        if(getActivity() != null) {
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+        }
+        double x = Math.pow(dm.widthPixels/dm.xdpi,2);
+        double y = Math.pow(dm.heightPixels/dm.ydpi,2);
+        screenInches = Math.sqrt(x+y);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_player, container, false);
+        View view = null;
+        if(screenInches < Double.parseDouble("4.7")){
+            view = inflater.inflate(R.layout.fragment_player_mini, container, false);
+        } else {
+            view = inflater.inflate(R.layout.fragment_player, container, false);
+        }
 
         mPulseImageView = view.findViewById(R.id.player_pulse);
-        mPulseImageView.setImageResource(R.drawable.pulse);
+        Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
         mPlayerControl = view.findViewById(R.id.player_control);
         mPlayerControl.setOnClickListener(this);
 
@@ -87,18 +106,18 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             if (mediaController != null){
                 if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    mPulseImageView.setImageResource(R.drawable.pulse_on);
+                    Picasso.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
                 } else {
                     mPlayerControl.setImageResource(R.drawable.play);
-                    mPulseImageView.setImageResource(R.drawable.pulse);
+                    Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
                 }
             } else {
                 mPlayerControl.setImageResource(R.drawable.pause);
-                mPulseImageView.setImageResource(R.drawable.pulse_on);
+                Picasso.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
             }
         } else {
             mPlayerControl.setImageResource(R.drawable.play);
-            mPulseImageView.setImageResource(R.drawable.pulse);
+            Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
         }
 
         Typeface geometriaFace = Typeface.createFromAsset(mContext.getAssets(), "geometria.ttf");
@@ -131,14 +150,17 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         mWhatsappIcon.setOnClickListener(this);
         mViberIcon.setOnClickListener(this);
         mTelegramIcon.setOnClickListener(this);
-        initParams();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        getPlaySong = new GetPlaySong(songCallBack);
+        timer = new Timer();
+        timer.schedule(getPlaySong, 0, 5000);
         getPlaySong.play();
+
     }
 
     @Override
@@ -197,11 +219,11 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                         ContextCompat.startForegroundService(mContext, new Intent(mContext, PlayerRadioService.class));
                         mPlayerControl.setImageResource(R.drawable.pause);
                         mediaController.getTransportControls().play();
-                        mPulseImageView.setImageResource(R.drawable.pulse_on);
+                        Picasso.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
                     } else {
                         mPlayerControl.setImageResource(R.drawable.play);
                         mediaController.getTransportControls().pause();
-                        mPulseImageView.setImageResource(R.drawable.pulse);
+                        Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
                     }
                 } else {
                     mPlayerControl.setImageResource(R.drawable.pause);
@@ -274,10 +296,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     }
 
     private void initParams() {
-        SongCallBack songCallBack = this;
-        getPlaySong = new GetPlaySong(songCallBack);
-        timer = new Timer();
-        timer.schedule(getPlaySong, 0, 5000);
+        songCallBack = this;
     }
 
     private void startServicePlayRadio() {
@@ -291,10 +310,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 playing = state.getState() == PlaybackStateCompat.STATE_PLAYING;
                 if(playing) {
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    mPulseImageView.setImageResource(R.drawable.pulse_on);
+                    Picasso.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
                 } else {
                     mPlayerControl.setImageResource(R.drawable.play);
-                    mPulseImageView.setImageResource(R.drawable.pulse);
+                    Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
                 }
             }
         };
