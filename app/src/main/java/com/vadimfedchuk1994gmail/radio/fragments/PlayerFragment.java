@@ -1,5 +1,6 @@
 package com.vadimfedchuk1994gmail.radio.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -17,6 +18,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -86,6 +88,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         screenInches = Math.sqrt(x+y);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

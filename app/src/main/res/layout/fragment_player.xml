@@ -17,11 +17,11 @@
         android:id="@+id/player_pulse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="46dp"
         android:contentDescription="@null"
         android:scaleType="fitXY"
         android:visibility="visible"
-        android:layout_below="@id/logo_imageView"/>
+        android:layout_below="@id/logo_imageView"
+        android:layout_marginTop="46dp"/>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/player_control"
@@ -30,7 +30,8 @@
         android:layout_marginTop="24dp"
         android:layout_centerHorizontal="true"
         android:src="@drawable/play"
-        android:layout_below="@id/logo_imageView"/>
+        android:layout_below="@id/logo_imageView"
+        android:tint="#80000000"/>
 
     <TextView
         android:id="@+id/player_playTime"
