@@ -97,6 +97,9 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             view = inflater.inflate(R.layout.fragment_player, container, false);
         }
 
+        ImageView mLogoView = view.findViewById(R.id.logo_imageView);
+        Picasso.with(mContext).load(R.drawable.logo).into(mLogoView);
+
         mPulseImageView = view.findViewById(R.id.player_pulse);
         Picasso.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
         mPlayerControl = view.findViewById(R.id.player_control);

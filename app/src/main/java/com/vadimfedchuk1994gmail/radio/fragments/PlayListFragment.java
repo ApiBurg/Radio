@@ -108,6 +108,7 @@ public class PlayListFragment extends Fragment {
         new Thread(() -> {
             assert response != null;
             String[] playListArray = response.split("\n");
+            obj.clear();
             for (String s : playListArray) {
                 String[] item = s.split(";");
                 obj.add(new PlayListPOJO(item[1], item[0]));

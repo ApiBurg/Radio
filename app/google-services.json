@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "364463265255-pgcgkl0se5se3lkfo51kc4io6itcndkb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vadimfedchuk1994gmail.radio",
+            "certificate_hash": "3e24a7606e54a6ca01f015d394d5826fe51ea6e8"
+          }
+        },
+        {
           "client_id": "364463265255-l9jitpca56cdorp2ac42lds2nna1l600.apps.googleusercontent.com",
           "client_type": 3
         }

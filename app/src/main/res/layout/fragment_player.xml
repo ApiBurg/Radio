@@ -8,7 +8,6 @@
         android:id="@+id/logo_imageView"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:src="@drawable/logo"
         android:contentDescription="@null"
         android:layout_marginTop="55dp"
         android:layout_marginLeft="80dp"

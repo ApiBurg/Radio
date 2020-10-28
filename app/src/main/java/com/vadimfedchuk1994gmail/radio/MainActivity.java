@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private void initParams() {
         fragmentSelectCallBack = this;
-        FirebaseMessaging.getInstance().unsubscribeFromTopic("translation");
+        FirebaseMessaging.getInstance().subscribeToTopic("translation");
+        FirebaseMessaging.getInstance().subscribeToTopic("android_translation");
     }
 
     private void initView() {
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
         mFragmentTransaction.commit();
+
     }
 
     @Override
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
         mFragmentTransaction.commit();
+        getSupportFragmentManager().popBackStack();
         return true;
     }
 
@@ -89,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mFragmentTransaction.add(R.id.main_container, mInfoFragment);
         mFragmentTransaction.commit();
+        getSupportFragmentManager().popBackStack();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
