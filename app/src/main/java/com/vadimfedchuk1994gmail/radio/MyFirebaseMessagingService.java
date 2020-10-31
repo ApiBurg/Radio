@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -23,7 +24,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         int notification = sPref.getInt("NOTIFICATION", 0);
         if(notification == 0) createNotificationChannel();
         Intent notificationIntent = new Intent(this, LiveVk.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this,"1")
                 .setSmallIcon(R.drawable.ic_action_notification)
                 .setContentTitle("Пульс-Радио")
@@ -36,6 +37,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
         notificationManagerCompat.notify((int) System.currentTimeMillis(), mBuilder.build());
+    }
+
+    @Override
+    public void onNewToken(@NonNull String s) {
+        super.onNewToken(s);
     }
 
     private void createNotificationChannel() {
