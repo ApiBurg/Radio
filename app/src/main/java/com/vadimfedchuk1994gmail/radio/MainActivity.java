@@ -66,18 +66,13 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        switch (item.getItemId()){
-            case R.id.action_playlist:
-                mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
-                break;
-
-            case R.id.action_play:
-                mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
-                break;
-
-            case R.id.action_info:
-                mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
-                break;
+        int itemId = item.getItemId();
+        if(itemId == R.id.action_playlist){
+            mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
+        } else if(itemId == R.id.action_play){
+            mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
+        } else if(itemId == R.id.action_info){
+            mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         }
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
