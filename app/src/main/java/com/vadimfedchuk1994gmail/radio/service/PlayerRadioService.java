@@ -26,6 +26,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media.session.MediaButtonReceiver;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -41,10 +42,13 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.vadimfedchuk1994gmail.radio.MainActivity;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
+
+import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
 public class PlayerRadioService extends Service  {
 
@@ -80,6 +84,7 @@ public class PlayerRadioService extends Service  {
                 PendingIntent.getBroadcast(mContext, 0, mediaButtonIntent, 0));
         myStartForeground();
         initializationExoPlayer();
+        lock();
     }
 
     @Override
@@ -112,10 +117,13 @@ public class PlayerRadioService extends Service  {
     private void initializationExoPlayer() {
         Handler mainHandler = new Handler();
         RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
-
         TrackSelector trackSelector = new DefaultTrackSelector();
-        LoadControl loadControl = new DefaultLoadControl();
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
+
+        DefaultAllocator allocator = new DefaultAllocator(false, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+        LoadControl loadControl = new DefaultLoadControl(allocator, 6500, 50000,
+                5500, 6500, C.LENGTH_UNSET, true);
+
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector,   loadControl);
         dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
         extractorsFactory = new DefaultExtractorsFactory();
         MediaSource mediaSource =

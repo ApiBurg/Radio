@@ -10,7 +10,6 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -18,14 +17,13 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
-import com.vadimfedchuk1994gmail.radio.intarfaces.FragmentSelectCallBack;
 
 public class MainActivity extends AppCompatActivity implements
-        BottomNavigationView.OnNavigationItemSelectedListener, FragmentSelectCallBack {
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private FragmentSelectCallBack fragmentSelectCallBack;
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
+    private PlayerFragment mPlayerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +40,7 @@ public class MainActivity extends AppCompatActivity implements
         if(wakeLock != null) wakeLock.release();
     }
 
-    @Override
-    public void selectFragmentCallBack(int position) {
-        selectFragment();
-    }
-
     private void initParams() {
-        fragmentSelectCallBack = this;
         FirebaseMessaging.getInstance().subscribeToTopic("translation");
         FirebaseMessaging.getInstance().subscribeToTopic("android_translation");
     }
@@ -58,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.add(R.id.main_container, new PlayerFragment());
+        mPlayerFragment  = new PlayerFragment();
+        mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
         mFragmentTransaction.commit();
 
     }
@@ -70,21 +63,13 @@ public class MainActivity extends AppCompatActivity implements
         if(itemId == R.id.action_playlist){
             mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
         } else if(itemId == R.id.action_play){
-            mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
+            mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
         } else if(itemId == R.id.action_info){
             mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         }
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
         return true;
-    }
-
-    public void selectFragment(){
-        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.add(R.id.main_container, new InfoFragment());
-        mFragmentTransaction.commit();
-        getSupportFragmentManager().popBackStack();
-        mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
     private void lock() {

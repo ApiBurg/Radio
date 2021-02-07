@@ -58,7 +58,7 @@ public class GetPlaySong extends TimerTask {
                 String playName = play[1].trim();
 
                 if(job){
-                    callBack.songCallBack(playName, playTime, true);
+                    callBack.playSong(playName, playTime, true);
                 }
             } catch (RuntimeException ignored){ }
         }

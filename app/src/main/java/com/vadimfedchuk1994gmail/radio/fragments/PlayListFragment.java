@@ -95,6 +95,12 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        obj.clear();
+    }
+
+    @Override
     public void playListOnSuccess(ArrayList<PlayListPOJO> responseObject) {
         mErrorTextView.setVisibility(View.GONE);
         obj.clear();
