@@ -5,6 +5,7 @@ package com.vadimfedchuk1994gmail.radio.fragments;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,21 +23,24 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.adapters.PlayListAdapter;
+import com.vadimfedchuk1994gmail.radio.intarfaces.PlayListViewCallBack;
 import com.vadimfedchuk1994gmail.radio.models.PlayListPOJO;
+import com.vadimfedchuk1994gmail.radio.repository.PlayListController;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
-public class PlayListFragment extends Fragment {
+public class PlayListFragment extends Fragment implements PlayListViewCallBack {
 
     private Context mContext;
     private ArrayList<PlayListPOJO> obj = new ArrayList<>();
     private PlayListAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private boolean isVisibilityFragment = false;
+    private PlayListController playListController;
+    private TextView mErrorTextView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,14 +54,10 @@ public class PlayListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_playlist, container, false);
-
         TextView mTitleToolBar = view.findViewById(R.id.playListCustomToolBar_title);
         Typeface geometriaFace = Typeface.createFromAsset(mContext.getAssets(), "geometria.ttf");
         mTitleToolBar.setTypeface(geometriaFace);
-
         mProgressBar = view.findViewById(R.id.playList_progressBar);
-        if(obj.size() == 0)  mProgressBar.setVisibility(View.VISIBLE);
-
         mSwipeRefreshLayout = view.findViewById(R.id.playlist_swipeRefreshLayout);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorSwipeRefreshLayout);
         mSwipeRefreshLayout.setRefreshing(false);
@@ -65,7 +65,14 @@ public class PlayListFragment extends Fragment {
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mSwipeRefreshLayout.setOnRefreshListener(this::queryDataFromServer);
+        playListController = new PlayListController(this);
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            playListController.getPlayListObject();
+        });
+        mErrorTextView = view.findViewById(R.id.playList_error);
+        mErrorTextView.setVisibility(View.GONE);
+        Typeface mGeometriaFace = Typeface.createFromAsset(getContext().getAssets(), "geometria.ttf");
+        mErrorTextView.setTypeface(mGeometriaFace);
         return view;
     }
 
@@ -73,54 +80,37 @@ public class PlayListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        isVisibilityFragment = true;
-        queryDataFromServer();
+        mErrorTextView.setVisibility(View.GONE);
+        playListController.repositoryCondition(true);
+        obj.clear();
+        mProgressBar.setVisibility(View.VISIBLE);
+        mAdapter.notifyDataSetChanged();
+        playListController.getPlayListObject();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        isVisibilityFragment = false;
+        playListController.repositoryCondition(false);
     }
 
-    private void queryDataFromServer() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://mobile.puls-radio.ru/puls10.txt", new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                String response = null;
-                try {
-                    response = new String(responseBody, "windows-1251");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                startParserPlayList(response);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
-            }
-        });
+    @Override
+    public void playListOnSuccess(ArrayList<PlayListPOJO> responseObject) {
+        mErrorTextView.setVisibility(View.GONE);
+        obj.clear();
+        obj.addAll(responseObject);
+        mSwipeRefreshLayout.setRefreshing(false);
+        mProgressBar.setVisibility(View.GONE);
+        mAdapter.notifyDataSetChanged();
     }
 
-    private void startParserPlayList(String response) {
-        new Thread(() -> {
-            assert response != null;
-            String[] playListArray = response.split("\n");
-            obj.clear();
-            for (String s : playListArray) {
-                String[] item = s.split(";");
-                obj.add(new PlayListPOJO(item[1], item[0]));
-            }
-            if(getActivity() != null & isVisibilityFragment){
-                getActivity().runOnUiThread(() -> {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    mProgressBar.setVisibility(View.GONE);
-                    mAdapter.notifyDataSetChanged();
-                });
-            }
-        }).start();
+    @Override
+    public void playlistOnFailure(int statusCode) {
+        obj.clear();
+        mSwipeRefreshLayout.setRefreshing(false);
+        mProgressBar.setVisibility(View.GONE);
+        mAdapter.notifyDataSetChanged();
+        mErrorTextView.setVisibility(View.VISIBLE);
     }
 
 }

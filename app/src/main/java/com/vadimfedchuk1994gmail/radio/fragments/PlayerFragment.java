@@ -66,9 +66,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private double screenInches;
     private SongCallBack songCallBack;
 
-    public PlayerFragment(FragmentSelectCallBack selectFragmentCallBack){
+
+   /* public PlayerFragment(FragmentSelectCallBack selectFragmentCallBack){
         this.selectFragmentCallBack = selectFragmentCallBack;
-    }
+    } */
 
 
     @Override

@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity implements
         BottomNavigationView.OnNavigationItemSelectedListener, FragmentSelectCallBack {
 
     private FragmentSelectCallBack fragmentSelectCallBack;
-    private Fragment mPlayerFragment, mPlayListFragment, mInfoFragment;
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
 
@@ -58,11 +57,8 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView = findViewById(R.id.main_bottomNavigationView);
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
-        mPlayerFragment = new PlayerFragment(fragmentSelectCallBack);
-        mPlayListFragment = new PlayListFragment();
-        mInfoFragment = new InfoFragment();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
+        mFragmentTransaction.add(R.id.main_container, new PlayerFragment());
         mFragmentTransaction.commit();
 
     }
@@ -72,15 +68,15 @@ public class MainActivity extends AppCompatActivity implements
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         switch (item.getItemId()){
             case R.id.action_playlist:
-                mFragmentTransaction.replace(R.id.main_container, mPlayListFragment);
+                mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
                 break;
 
             case R.id.action_play:
-                mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
+                mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
                 break;
 
             case R.id.action_info:
-                mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+                mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
                 break;
         }
         mFragmentTransaction.commit();
@@ -90,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public void selectFragment(){
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.add(R.id.main_container, mInfoFragment);
+        mFragmentTransaction.add(R.id.main_container, new InfoFragment());
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
