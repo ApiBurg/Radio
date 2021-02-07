@@ -172,7 +172,7 @@
             android:textColor="@drawable/button_color"
             android:paddingTop="7dp"
             android:textStyle="bold"
-            android:text="Республика Марий Эл г. Йошкар-Ола,\n Бульвар победы 15а"/>
+            android:text="Республика Марий Эл г. Йошкар-Ола,\n Бульвар Победы 15а"/>
 
         <TextView
             android:id="@+id/info_linkSite"
