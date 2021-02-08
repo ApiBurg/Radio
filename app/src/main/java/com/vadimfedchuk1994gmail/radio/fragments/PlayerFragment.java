@@ -1,11 +1,13 @@
 package com.vadimfedchuk1994gmail.radio.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -20,10 +22,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.vadimfedchuk1994gmail.radio.LiveVk;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
@@ -117,10 +121,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         new Timer().schedule(getPlaySong, 0, 5000);
         MyServiceRunning myServiceRunning = new MyServiceRunning(mContext);
         if(myServiceRunning.isMyServiceRunning()) {
-            Log.d("MyLog", "СЕРВИС ЗАПУЩЕН!");
             if(mServiceConnection == null) startServicePlayRadio(false);
-        } else {
-            Log.d("MyLog", "СЕРВИС НЕ ЗАПУЩЕН!");
         }
     }
 
@@ -142,7 +143,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public void onDestroy() {
         if(mediaController != null){
             if(mediaController.getPlaybackState().getState() != PlaybackStateCompat.STATE_PLAYING){
-                getActivity().unbindService(mServiceConnection);
+                if(getActivity() != null) getActivity().unbindService(mServiceConnection);
             }
         }
         super.onDestroy();
@@ -161,6 +162,43 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 } else {
                     mediaController.getTransportControls().play();
                 }
+            }
+        } else if(viewId == R.id.player_buttonLive){
+            Intent liveIntent = new Intent(mContext, LiveVk.class);
+            startActivity(liveIntent);
+        } else if(viewId == R.id.player_vk){
+            Intent vkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://vk.com/yolapulsradio"));
+            mContext.startActivity(vkIntent);
+        } else if(viewId == R.id.player_instagram){
+            Intent instagramIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/_u/pulsradio_yo"));
+            mContext.startActivity(instagramIntent);
+        } else if(viewId == R.id.player_whatsapp){
+            Intent whatsAppIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://api.whatsapp.com/send?phone=+79177112525"));
+            mContext.startActivity(whatsAppIntent);
+        } else if(viewId == R.id.player_viber){
+            try {
+                String number = "+79177112525";
+                Uri uri = Uri.parse("tel:" + Uri.encode(number));
+                Intent viberIntent = new Intent("android.intent.action.VIEW");
+                viberIntent.setClassName("com.viber.voip", "com.viber.voip.WelcomeActivity");
+                viberIntent.setData(uri);
+                mContext.startActivity(viberIntent);
+            } catch (ActivityNotFoundException e) {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                alertDialog.setTitle(R.string.error).setMessage(R.string.viber_not_found)
+                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.cancel());
+                alertDialog.show();
+            }
+        } else if(viewId == R.id.player_telegram){
+            try {
+                Intent telegramIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=puls_radio_yo"));
+                mContext.startActivity(telegramIntent);
+            } catch (ActivityNotFoundException e) {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                alertDialog.setTitle(R.string.error).setMessage(R.string.telegram_not_found)
+                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.cancel());
+                alertDialog.show();
             }
         }
     }
