@@ -18,10 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:contentDescription="@null"
-        android:scaleType="fitXY"
-        android:visibility="visible"
         android:layout_below="@id/logo_imageView"
-        android:layout_marginTop="46dp"/>
+        android:layout_marginTop="-16dp"
+        android:src="@drawable/pulse_on"/>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/player_control"

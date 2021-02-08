@@ -221,10 +221,12 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 if(state == null) return;
                 if(state.getState() == PlaybackStateCompat.STATE_PLAYING) {
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    mPulseImageView.setImageResource(R.drawable.pulse_on);
+                    ///mPulseImageView.setImageResource(R.drawable.pulse_on);
+                    Glide.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
                 } else {
                     mPlayerControl.setImageResource(R.drawable.play);
-                    mPulseImageView.setImageResource(R.drawable.pulse);
+                    //mPulseImageView.setImageResource(R.drawable.pulse);
+                    Glide.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
                 }
             }
         };
@@ -258,7 +260,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 }
             }
         };
-        getActivity().bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+        if(getActivity() != null) getActivity().bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
 }

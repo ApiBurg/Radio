@@ -2,6 +2,7 @@ package com.vadimfedchuk1994gmail.radio;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -21,11 +22,13 @@ public class LiveVk extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private WebView mWebView;
     private boolean isNetwork;
+    private int call;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live);
+        initData();
         initToolBar();
     }
 
@@ -37,6 +40,11 @@ public class LiveVk extends AppCompatActivity {
             initView();
             initWebView();
         }
+    }
+
+    private void initData() {
+        Intent data = getIntent();
+        call = data.getIntExtra("call", 0);
     }
 
     private void initToolBar() {

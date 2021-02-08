@@ -44,6 +44,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.PriorityTaskManager;
 import com.vadimfedchuk1994gmail.radio.MainActivity;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
@@ -51,6 +52,8 @@ import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
 import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
 public class PlayerRadioService extends Service  {
+
+    private static final int BUFFER_SEGMENT_SIZE = 64 * 1024;
 
     private Context mContext;
     private SimpleExoPlayer exoPlayer;
@@ -119,11 +122,20 @@ public class PlayerRadioService extends Service  {
         RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
         TrackSelector trackSelector = new DefaultTrackSelector();
 
-        DefaultAllocator allocator = new DefaultAllocator(false, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-        LoadControl loadControl = new DefaultLoadControl(allocator, 6500, 50000,
+        //*DefaultAllocator allocator = new DefaultAllocator(false, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+        /*(LoadControl loadControl = new DefaultLoadControl(allocator, 6500, 50000,
                 5500, 6500, C.LENGTH_UNSET, true);
+        */
+        PriorityTaskManager priorityTaskManager = new PriorityTaskManager();
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector,   loadControl);
+        DefaultAllocator defaultAllocator = new DefaultAllocator(false, BUFFER_SEGMENT_SIZE);
+        LoadControl loadControl =
+                new DefaultLoadControl(defaultAllocator, 6500, 50000,
+                        5500, 6500, C.LENGTH_UNSET,
+                        true, priorityTaskManager);
+
+
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
         dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
         extractorsFactory = new DefaultExtractorsFactory();
         MediaSource mediaSource =
@@ -236,12 +248,11 @@ public class PlayerRadioService extends Service  {
         refreshNotificationAndForegroundStatus(currentState);
     }
 
-    private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener =
+    private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener =
             new AudioManager.OnAudioFocusChangeListener() {
                 @Override
                 public void onAudioFocusChange(int focusChange) {
                     switch (focusChange) {
-
                         case AudioManager.AUDIOFOCUS_GAIN:
                             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeMusic, 0);
                             mediaSessionCallback.onPlay();
@@ -339,7 +350,7 @@ public class PlayerRadioService extends Service  {
         }
     }
 
-    private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
