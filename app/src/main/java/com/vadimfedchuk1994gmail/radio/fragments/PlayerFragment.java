@@ -1,6 +1,7 @@
 package com.vadimfedchuk1994gmail.radio.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.vadimfedchuk1994gmail.radio.LiveVk;
+import com.vadimfedchuk1994gmail.radio.MainActivity;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.intarfaces.SongCallBack;
 import com.vadimfedchuk1994gmail.radio.network.GetPlaySong;
@@ -55,6 +57,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private String playTime, playSongName;
     private MediaControllerCompat.Callback callback;
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +70,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = null;
+        mContext = getContext();
         if(screenInches < Double.parseDouble("4.7")){
             view = inflater.inflate(R.layout.fragment_player_mini, container, false);
         } else {
@@ -75,8 +79,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
         ImageView mLogoView = view.findViewById(R.id.logo_imageView);
         Glide.with(mContext).load(R.drawable.logo).into(mLogoView);
+
         mPulseImageView = view.findViewById(R.id.player_pulse);
-        Glide.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
+        setPulse(false);
+
         mPlayerControl = view.findViewById(R.id.player_control);
         mPlayerControl.setOnClickListener(this);
         Typeface geometriaFace = Typeface.createFromAsset(mContext.getAssets(), "geometria.ttf");
@@ -105,7 +111,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         if(mediaController != null){
             if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
                 mPlayerControl.setImageResource(R.drawable.pause);
-                Glide.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
+                setPulse(true);
             }
         }
 
@@ -157,10 +163,15 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 mPlayerControl.setImageResource(R.drawable.pause);
                 startServicePlayRadio(true);
             } else {
-                if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
-                    mediaController.getTransportControls().pause();
-                } else {
-                    mediaController.getTransportControls().play();
+                try {
+                    if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
+                        mediaController.getTransportControls().pause();
+                    } else {
+                        mediaController.getTransportControls().play();
+                    }
+                } catch (NullPointerException e){
+                    mPlayerControl.setImageResource(R.drawable.pause);
+                    setPulse(false);
                 }
             }
         } else if(viewId == R.id.player_buttonLive){
@@ -200,13 +211,14 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                         .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.cancel());
                 alertDialog.show();
             }
+        } else if(viewId == R.id.player_info){
+            if(getActivity() != null) ((MainActivity) getActivity()).setInfoFragment();
         }
     }
 
     private void initParams() {
         playTime = "-- --";
         playSongName = "Обновление данных...";
-        mContext = getContext();
         DisplayMetrics dm = new DisplayMetrics();
         if(getActivity() != null) getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
         double x = Math.pow(dm.widthPixels/dm.xdpi,2);
@@ -221,12 +233,12 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                 if(state == null) return;
                 if(state.getState() == PlaybackStateCompat.STATE_PLAYING) {
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    ///mPulseImageView.setImageResource(R.drawable.pulse_on);
-                    Glide.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
+                    setPulse(true);
+
+
                 } else {
                     mPlayerControl.setImageResource(R.drawable.play);
-                    //mPulseImageView.setImageResource(R.drawable.pulse);
-                    Glide.with(mContext).load(R.drawable.pulse).into(mPulseImageView);
+                    setPulse(false);
                 }
             }
         };
@@ -246,7 +258,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                     mediaController.getTransportControls().play();
                 } else {
                     if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
-                        Glide.with(mContext).load(R.drawable.pulse_on).into(mPulseImageView);
+                        setPulse(true);
                     }
                 }
             }
@@ -261,6 +273,45 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
             }
         };
         if(getActivity() != null) getActivity().bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+
+    private void setPulse(boolean pulse){
+        try {
+            if(pulse){
+                if(getContext() != null){
+                    Context context = getContext();
+                    DisplayMetrics displaymetrics = new DisplayMetrics();
+                    ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                    int screenWidth = displaymetrics.widthPixels;
+                    float dp_one = 619 / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+                    float scale = context.getResources().getDisplayMetrics().density;
+                    int dp_final = ((int) (dp_one * scale + 0.5f));
+                    ViewGroup.LayoutParams params =  mPulseImageView.getLayoutParams();
+                    params.width = screenWidth;
+                    params.height = dp_final;
+                    mPulseImageView.setLayoutParams(params);
+                    Glide.with(context).load(R.drawable.pulse_on).into(mPulseImageView);
+                }
+            } else {
+                if(getContext() != null) {
+                    Context context = getContext();
+                    DisplayMetrics displaymetrics = new DisplayMetrics();
+                    ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                    int screenWidth = displaymetrics.widthPixels;
+                    float dp_one = 52 / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+                    float scale = context.getResources().getDisplayMetrics().density;
+                    int dp_final = ((int) (dp_one * scale + 0.5f));
+                    ViewGroup.LayoutParams params =  mPulseImageView.getLayoutParams();
+                    params.width = screenWidth;
+                    params.height = dp_final;
+                    mPulseImageView.setLayoutParams(params);
+                    Glide.with(context).load(R.drawable.pulse).into(mPulseImageView);
+                }
+            }
+        } catch (NullPointerException e){
+            Log.d("MyLog", "Произошла ошибка: "+e);
+        }
     }
 
 }

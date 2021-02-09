@@ -21,6 +21,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -32,14 +33,20 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
@@ -50,6 +57,9 @@ import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.utils.MediaStyleHelper;
 
 import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
+import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS;
+import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_MAX_BUFFER_MS;
+import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_MIN_BUFFER_MS;
 
 public class PlayerRadioService extends Service  {
 
@@ -74,6 +84,8 @@ public class PlayerRadioService extends Service  {
     private int currentState = PlaybackStateCompat.STATE_PAUSED;
     int notification_id = 12313;
     private PowerManager.WakeLock wakeLock;
+
+    long positionPlayStream = 0;
 
     @Override
     public void onCreate() {
@@ -120,62 +132,91 @@ public class PlayerRadioService extends Service  {
     private void initializationExoPlayer() {
         Handler mainHandler = new Handler();
         RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
-        TrackSelector trackSelector = new DefaultTrackSelector();
 
-        //*DefaultAllocator allocator = new DefaultAllocator(false, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-        /*(LoadControl loadControl = new DefaultLoadControl(allocator, 6500, 50000,
-                5500, 6500, C.LENGTH_UNSET, true);
-        */
+
+        TrackSelector trackSelector = new DefaultTrackSelector();
         PriorityTaskManager priorityTaskManager = new PriorityTaskManager();
 
-        DefaultAllocator defaultAllocator = new DefaultAllocator(false, BUFFER_SEGMENT_SIZE);
+        DefaultAllocator defaultAllocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         LoadControl loadControl =
-                new DefaultLoadControl(defaultAllocator, 6500, 50000,
+                new DefaultLoadControl(defaultAllocator, 7000, 50000,
                         5500, 6500, C.LENGTH_UNSET,
                         true, priorityTaskManager);
 
-
         exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
+        AudioAttributes.Builder builderAudio = new AudioAttributes.Builder()
+                .setContentType(C.CONTENT_TYPE_MUSIC);
+
+        exoPlayer.setAudioAttributes(builderAudio.build());
         dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
         extractorsFactory = new DefaultExtractorsFactory();
+        exoPlayer.setPlayWhenReady(true);
+
         MediaSource mediaSource =
                     new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory,
                             extractorsFactory, mainHandler, null);
 
-        exoPlayer.prepare(mediaSource);
+        exoPlayer.prepare(mediaSource, false, false);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
             volumeMusic =  audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         }
+
 
         exoPlayer.addListener(new Player.EventListener() {
 
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 forcedPlay();
+                Log.d("MyLog", "onPlayerError: "+error.getSourceException());
             }
 
             @Override
             public void onPositionDiscontinuity(int reason) {
+                Log.d("MyLog", "onPositionDiscontinuity!");
+               // exoPlayer.seekTo(exoPlayer.getContentPosition());
             }
+
+            @Override
+            public void onSeekProcessed() {
+                Log.d("MyLog", "getCurrentPosition = "+exoPlayer.getCurrentPosition());
+                Log.d("MyLog", "getBufferedPosition = "+exoPlayer.getBufferedPosition());
+            }
+
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+                Log.d("MyLog", "onLoadingChanged Буффер = "+exoPlayer.getBufferedPosition());
+            }
+
         });
+
+        exoPlayer.addAnalyticsListener(new AnalyticsListener() {
+            @Override
+            public void onTimelineChanged(EventTime eventTime, int reason) {
+                Log.d("MyLog", "=======");
+            }
+
+        });
+
     }
 
     MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
 
         @Override
         public void onPlay() {
+            Log.d("MyLog", "СРАБОТАЛ MediaSessionCompat onPlay");
+            Log.d("MyLog", "###getCurrentPosition = "+exoPlayer.getCurrentPosition());
+            Log.d("MyLog", "###getBufferedPosition = "+exoPlayer.getBufferedPosition());
             int audioFocusResult = audioManager.requestAudioFocus(
                     audioFocusChangeListener,
                     AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
             if(audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return;
             mediaSession.setActive(true);
+
             mediaSession.setPlaybackState(
                     stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                             PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
-
-            prepareToPlay(Uri.parse("http://178.208.85.117:8000/puls"));
             exoPlayer.setPlayWhenReady(true);
             registerReceiver(
                     becomingNoisyReceiver,
@@ -222,13 +263,6 @@ public class PlayerRadioService extends Service  {
         }
     };
 
-    private void prepareToPlay(Uri uri) {
-        ExtractorMediaSource
-             mediaSource =
-                    new ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null);
-        exoPlayer.prepare(mediaSource);
-    }
-
     private void forcedPlay(){
         int audioFocusResult = audioManager.requestAudioFocus(
                 audioFocusChangeListener,
@@ -239,7 +273,10 @@ public class PlayerRadioService extends Service  {
         mediaSession.setPlaybackState(
                 stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                         PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
-        prepareToPlay(Uri.parse("http://178.208.85.117:8000/puls"));
+        ExtractorMediaSource
+                mediaSource =
+                new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory, extractorsFactory, null, null);
+        exoPlayer.prepare(mediaSource, false, false);
         exoPlayer.setPlayWhenReady(true);
         registerReceiver(
                 becomingNoisyReceiver,

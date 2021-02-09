@@ -3,12 +3,15 @@
 package com.vadimfedchuk1994gmail.radio;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -18,12 +21,14 @@ import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
 
+
 public class MainActivity extends AppCompatActivity implements
         BottomNavigationView.OnNavigationItemSelectedListener {
 
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
     private PlayerFragment mPlayerFragment;
+    private InfoFragment mInfoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,12 @@ public class MainActivity extends AppCompatActivity implements
         if(wakeLock != null) wakeLock.release();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("MyLog", "Вызван метод onActivityResult");
+    }
+
     private void initParams() {
         FirebaseMessaging.getInstance().subscribeToTopic("translation");
         FirebaseMessaging.getInstance().subscribeToTopic("android_translation");
@@ -51,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mPlayerFragment  = new PlayerFragment();
+        mInfoFragment = new InfoFragment();
         mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
         mFragmentTransaction.commit();
 
@@ -65,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         } else if(itemId == R.id.action_play){
             mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
         } else if(itemId == R.id.action_info){
-            mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
+            mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
         }
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
@@ -85,6 +97,14 @@ public class MainActivity extends AppCompatActivity implements
             wfl = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "sync_all_wifi");
         }
         if (wfl != null) { wfl.acquire(); }
+    }
+
+    public void setInfoFragment(){
+        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
+        mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+        mFragmentTransaction.commit();
+        getSupportFragmentManager().popBackStack();
+        mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
 }
