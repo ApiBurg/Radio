@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity implements
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
     private PlayerFragment mPlayerFragment;
-    private InfoFragment mInfoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +61,8 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mPlayerFragment  = new PlayerFragment();
-        mInfoFragment = new InfoFragment();
         mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
-        mFragmentTransaction.commit();
-
+        mFragmentTransaction.commitNowAllowingStateLoss();
     }
 
     @Override
@@ -77,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements
         } else if(itemId == R.id.action_play){
             mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
         } else if(itemId == R.id.action_info){
-            mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+            mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         }
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
@@ -101,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public void setInfoFragment(){
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.replace(R.id.main_container, mInfoFragment);
+        mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         mFragmentTransaction.commit();
         getSupportFragmentManager().popBackStack();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);

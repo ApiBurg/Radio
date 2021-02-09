@@ -7,8 +7,8 @@ android {
         applicationId "com.vadimfedchuk1994gmail.radio"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 61
-        versionName "11.3.7"
+        versionCode 62
+        versionName "11.3.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
