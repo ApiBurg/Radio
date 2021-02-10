@@ -148,13 +148,28 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
     @Override
     public void onDestroy() {
+        Log.d("MyLog", "onDestroy");
         if(mediaController != null){
+            Log.d("MyLog", "onDestroy PlaybackStateCompat "+mediaController.getPlaybackState());
             try {
                 if(mediaController.getPlaybackState().getState() != PlaybackStateCompat.STATE_PLAYING){
-                    if(getActivity() != null) getActivity().unbindService(mServiceConnection);
+                    if(getActivity() != null) {
+                        try {
+                            getActivity().unbindService(mServiceConnection);
+                        } catch (IllegalArgumentException ignored){}
+                        MyServiceRunning myServiceRunning = new MyServiceRunning(mContext);
+                        if(myServiceRunning.isMyServiceRunning()){
+                            Log.d("MyLog", "УНИЧТОЖАЕМ СЕРВИС!");
+                            getActivity().stopService(new Intent(getActivity(), PlayerRadioService.class));
+                        }
+                    }
                 }
             } catch (NullPointerException e){
-                if(getActivity() != null) getActivity().unbindService(mServiceConnection);
+                if(getActivity() != null) {
+                    try {
+                        getActivity().unbindService(mServiceConnection);
+                    } catch (IllegalArgumentException ignored){}
+                }
             }
         }
         super.onDestroy();
@@ -162,21 +177,30 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
     @Override
     public void onClick(View v) {
+        Log.d("MyLog", "Произошел клик!");
         int viewId = v.getId();
         if(viewId == R.id.player_control){
             if (mediaController == null){
+                Log.d("MyLog", "mediaController = null");
                 mPlayerControl.setImageResource(R.drawable.pause);
                 startServicePlayRadio(true);
             } else {
-                try {
-                    if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
-                        mediaController.getTransportControls().pause();
-                    } else {
-                        mediaController.getTransportControls().play();
+                MyServiceRunning myServiceRunning = new MyServiceRunning(mContext);
+                if(myServiceRunning.isMyServiceRunning()){
+                    try {
+                        if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
+                            mediaController.getTransportControls().pause();
+                        } else {
+                            mediaController.getTransportControls().play();
+                        }
+                    } catch (NullPointerException e){
+                        mPlayerControl.setImageResource(R.drawable.pause);
+                        if(pulse) setPulse(false);
                     }
-                } catch (NullPointerException e){
+                } else {
+                    Log.d("MyLog", "Пытаемся подключиться к сервису!");
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    if(pulse) setPulse(false);
+                    startServicePlayRadio(true);
                 }
             }
         } else if(viewId == R.id.player_buttonLive){
@@ -243,6 +267,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                             isProgressBarShow = true;
                             mProgressBar.setVisibility(View.VISIBLE);
                         }
+                        mProgressBar.setVisibility(View.VISIBLE);
                         break;
 
                     case PlaybackStateCompat.STATE_PLAYING:

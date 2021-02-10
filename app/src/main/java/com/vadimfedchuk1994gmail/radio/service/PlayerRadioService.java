@@ -168,6 +168,8 @@ public class PlayerRadioService extends Service  {
                     registerReceiver(
                             becomingNoisyReceiver,
                             new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+                } else if(playbackState == PlaybackStateCompat.STATE_CONNECTING){
+                    Log.d("MyLog", "Подключение к сервису!");
                 }
             }
         });
