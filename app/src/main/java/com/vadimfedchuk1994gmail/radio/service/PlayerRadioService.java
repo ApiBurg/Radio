@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -63,8 +64,6 @@ import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_MIN_BUFFE
 
 public class PlayerRadioService extends Service  {
 
-    private static final int BUFFER_SEGMENT_SIZE = 64 * 1024;
-
     private Context mContext;
     private SimpleExoPlayer exoPlayer;
     private MediaSessionCompat mediaSession;
@@ -84,8 +83,6 @@ public class PlayerRadioService extends Service  {
     private int currentState = PlaybackStateCompat.STATE_PAUSED;
     int notification_id = 12313;
     private PowerManager.WakeLock wakeLock;
-
-    long positionPlayStream = 0;
 
     @Override
     public void onCreate() {
@@ -132,95 +129,62 @@ public class PlayerRadioService extends Service  {
     private void initializationExoPlayer() {
         Handler mainHandler = new Handler();
         RenderersFactory renderersFactory = new DefaultRenderersFactory(getApplicationContext());
-
-
         TrackSelector trackSelector = new DefaultTrackSelector();
         PriorityTaskManager priorityTaskManager = new PriorityTaskManager();
-
         DefaultAllocator defaultAllocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         LoadControl loadControl =
                 new DefaultLoadControl(defaultAllocator, 7000, 50000,
                         5500, 6500, C.LENGTH_UNSET,
                         true, priorityTaskManager);
-
         exoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory, trackSelector, loadControl);
         AudioAttributes.Builder builderAudio = new AudioAttributes.Builder()
                 .setContentType(C.CONTENT_TYPE_MUSIC);
-
         exoPlayer.setAudioAttributes(builderAudio.build());
         dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoplayerDemo");
         extractorsFactory = new DefaultExtractorsFactory();
         exoPlayer.setPlayWhenReady(true);
-
         MediaSource mediaSource =
                     new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory,
                             extractorsFactory, mainHandler, null);
-
         exoPlayer.prepare(mediaSource, false, false);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            volumeMusic =  audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        }
-
-
+        if (audioManager != null) volumeMusic =  audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         exoPlayer.addListener(new Player.EventListener() {
 
             @Override
-            public void onPlayerError(ExoPlaybackException error) {
-                forcedPlay();
-                Log.d("MyLog", "onPlayerError: "+error.getSourceException());
-            }
-
-            @Override
-            public void onPositionDiscontinuity(int reason) {
-                Log.d("MyLog", "onPositionDiscontinuity!");
-               // exoPlayer.seekTo(exoPlayer.getContentPosition());
-            }
-
-            @Override
-            public void onSeekProcessed() {
-                Log.d("MyLog", "getCurrentPosition = "+exoPlayer.getCurrentPosition());
-                Log.d("MyLog", "getBufferedPosition = "+exoPlayer.getBufferedPosition());
-            }
-
-            @Override
             public void onLoadingChanged(boolean isLoading) {
-                Log.d("MyLog", "onLoadingChanged Буффер = "+exoPlayer.getBufferedPosition());
+                Log.d("MyLog", "onLoadingChanged! Показываем прогрес бар!");
+                mediaSession.setPlaybackState(
+                        stateBuilder.setState(PlaybackStateCompat.STATE_CONNECTING,
+                                PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
             }
 
-        });
-
-        exoPlayer.addAnalyticsListener(new AnalyticsListener() {
             @Override
-            public void onTimelineChanged(EventTime eventTime, int reason) {
-                Log.d("MyLog", "=======");
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if(playbackState == PlaybackStateCompat.STATE_PLAYING){
+                    mediaSession.setPlaybackState(
+                            stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                                    PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
+                    registerReceiver(
+                            becomingNoisyReceiver,
+                            new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+                }
             }
-
         });
-
     }
+
 
     MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
 
         @Override
         public void onPlay() {
-            Log.d("MyLog", "СРАБОТАЛ MediaSessionCompat onPlay");
-            Log.d("MyLog", "###getCurrentPosition = "+exoPlayer.getCurrentPosition());
-            Log.d("MyLog", "###getBufferedPosition = "+exoPlayer.getBufferedPosition());
             int audioFocusResult = audioManager.requestAudioFocus(
                     audioFocusChangeListener,
                     AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
             if(audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return;
             mediaSession.setActive(true);
-
-            mediaSession.setPlaybackState(
-                    stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
-                            PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
             exoPlayer.setPlayWhenReady(true);
-            registerReceiver(
-                    becomingNoisyReceiver,
-                    new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
             currentState = PlaybackStateCompat.STATE_PLAYING;
             refreshNotificationAndForegroundStatus(currentState);
         }
@@ -244,6 +208,7 @@ public class PlayerRadioService extends Service  {
 
         @Override
         public void onStop() {
+            Log.d("MyLog", "onStop! Останваливаем трансляцию!");
             exoPlayer.setPlayWhenReady(false);
             mediaSession.setActive(false);
             mediaSession.setPlaybackState(
@@ -261,6 +226,7 @@ public class PlayerRadioService extends Service  {
             stopForeground(true);
             stopSelf();
         }
+
     };
 
     private void forcedPlay(){
@@ -275,7 +241,8 @@ public class PlayerRadioService extends Service  {
                         PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
         ExtractorMediaSource
                 mediaSource =
-                new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"), dataSourceFactory, extractorsFactory, null, null);
+                new ExtractorMediaSource(Uri.parse("http://178.208.85.117:8000/puls"),
+                        dataSourceFactory, extractorsFactory, null, null);
         exoPlayer.prepare(mediaSource, false, false);
         exoPlayer.setPlayWhenReady(true);
         registerReceiver(

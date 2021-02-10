@@ -33,6 +33,14 @@
         android:layout_below="@id/logo_imageView"
         android:tint="#80000000"/>
 
+    <ProgressBar
+        android:id="@+id/player_progressBar"
+        android:layout_width="116dp"
+        android:layout_height="116dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/logo_imageView"
+        android:layout_marginTop="16dp" />
+
     <TextView
         android:id="@+id/player_playTime"
         android:layout_width="match_parent"

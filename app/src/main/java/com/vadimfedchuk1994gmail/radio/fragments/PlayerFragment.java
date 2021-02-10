@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -53,10 +54,11 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     private ServiceConnection mServiceConnection;
     private double screenInches;
     private GetPlaySong getPlaySong;
-
     private String playTime, playSongName;
     private MediaControllerCompat.Callback callback;
-
+    private ProgressBar mProgressBar;
+    private boolean isProgressBarShow = false;
+    private boolean pulse = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,10 +81,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
         ImageView mLogoView = view.findViewById(R.id.logo_imageView);
         Glide.with(mContext).load(R.drawable.logo).into(mLogoView);
-
         mPulseImageView = view.findViewById(R.id.player_pulse);
         setPulse(false);
-
+        mProgressBar = view.findViewById(R.id.player_progressBar);
+        mProgressBar.setVisibility(View.GONE);
         mPlayerControl = view.findViewById(R.id.player_control);
         mPlayerControl.setOnClickListener(this);
         Typeface geometriaFace = Typeface.createFromAsset(mContext.getAssets(), "geometria.ttf");
@@ -107,11 +109,10 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         mWhatsappIcon.setOnClickListener(this);
         mViberIcon.setOnClickListener(this);
         mTelegramIcon.setOnClickListener(this);
-
         if(mediaController != null){
             if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
                 mPlayerControl.setImageResource(R.drawable.pause);
-                setPulse(true);
+                if(!pulse) setPulse(true);
             }
         }
 
@@ -148,7 +149,11 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     @Override
     public void onDestroy() {
         if(mediaController != null){
-            if(mediaController.getPlaybackState().getState() != PlaybackStateCompat.STATE_PLAYING){
+            try {
+                if(mediaController.getPlaybackState().getState() != PlaybackStateCompat.STATE_PLAYING){
+                    if(getActivity() != null) getActivity().unbindService(mServiceConnection);
+                }
+            } catch (NullPointerException e){
                 if(getActivity() != null) getActivity().unbindService(mServiceConnection);
             }
         }
@@ -171,7 +176,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                     }
                 } catch (NullPointerException e){
                     mPlayerControl.setImageResource(R.drawable.pause);
-                    setPulse(false);
+                    if(pulse) setPulse(false);
                 }
             }
         } else if(viewId == R.id.player_buttonLive){
@@ -228,17 +233,36 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
     private void initMediaCallBack() {
         callback = new MediaControllerCompat.Callback() {
+            @SuppressLint("SwitchIntDef")
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
                 if(state == null) return;
-                if(state.getState() == PlaybackStateCompat.STATE_PLAYING) {
-                    mPlayerControl.setImageResource(R.drawable.pause);
-                    setPulse(true);
+                switch (state.getState()) {
+                    case PlaybackStateCompat.STATE_CONNECTING:
+                        if(!isProgressBarShow){
+                            isProgressBarShow = true;
+                            mProgressBar.setVisibility(View.VISIBLE);
+                        }
+                        break;
 
+                    case PlaybackStateCompat.STATE_PLAYING:
+                        mProgressBar.setVisibility(View.GONE);
+                        mPlayerControl.setImageResource(R.drawable.pause);
+                        if(!pulse) setPulse(true);
+                        break;
 
-                } else {
-                    mPlayerControl.setImageResource(R.drawable.play);
-                    setPulse(false);
+                    case PlaybackStateCompat.STATE_PAUSED:
+                        Log.d("MyLog", "STATE_PAUSED Меняем картинку на false!");
+                        mProgressBar.setVisibility(View.GONE);
+                        mPlayerControl.setImageResource(R.drawable.play);
+                        if(pulse) setPulse(false);
+                        break;
+
+                    default:
+                        Log.d("MyLog", "Меняем картинку на false!");
+                        mProgressBar.setVisibility(View.GONE);
+                        mPlayerControl.setImageResource(R.drawable.play);
+                        if(pulse) setPulse(false);
                 }
             }
         };
@@ -258,7 +282,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
                     mediaController.getTransportControls().play();
                 } else {
                     if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING){
-                        setPulse(true);
+                        if(!pulse) setPulse(true);
                     }
                 }
             }
@@ -277,6 +301,7 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
 
 
     private void setPulse(boolean pulse){
+        this.pulse = pulse;
         try {
             if(pulse){
                 if(getContext() != null){
