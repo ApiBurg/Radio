@@ -68,22 +68,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
+        getSupportFragmentManager().popBackStack();
+        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         if(itemId == R.id.action_playlist){
-            FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
             mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
-            mFragmentTransaction.commit();
-            getSupportFragmentManager().popBackStack();
         } else if(itemId == R.id.action_play){
-            FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
             mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
-            mFragmentTransaction.commit();
-            getSupportFragmentManager().popBackStack();
         } else if(itemId == R.id.action_info){
-            FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
             mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
-            mFragmentTransaction.commit();
-            getSupportFragmentManager().popBackStack();
         }
+        mFragmentTransaction.commit();
         return true;
     }
 
@@ -103,10 +97,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void setInfoFragment(){
-        FragmentTransaction mFragmentTransactionO = getSupportFragmentManager().beginTransaction();
-        mFragmentTransactionO.replace(R.id.main_container, new InfoFragment());
-        mFragmentTransactionO.commit();
         getSupportFragmentManager().popBackStack();
+        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
+        mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
+        mFragmentTransaction.commit();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
