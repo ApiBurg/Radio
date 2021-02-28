@@ -49,6 +49,9 @@
     <string name="edition">Редакция</string>
     <string name="advertising_department">Отдел рекламы</string>
     <string name="player_list_error">Не удалось загрузить\nсписок композиций, попробуйте\nповторить попытку ещё раз</string>
+    <string name="new_version">Новая версия</string>
+    <string name="new_version_description">В Google Play доступна новая версия приложения</string>
+    <string name="app_update">Обновить</string>
 </resources>
 
 

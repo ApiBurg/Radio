@@ -13,11 +13,12 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainController {
 
-    private MainViewCallBack viewCallBack;
+    private final MainViewCallBack viewCallBack;
     private boolean condition;
 
     public MainController(MainViewCallBack viewCallBack){
         this.viewCallBack = viewCallBack;
+        condition = true;
     }
 
     public void repositoryCondition(boolean condition) {
@@ -33,8 +34,6 @@ public class MainController {
                 Gson gson = new Gson();
                 VersionAppPOJO json = gson.fromJson(response, VersionAppPOJO.class);
                 int versionCode = BuildConfig.VERSION_CODE;
-                Log.d("MyLog", "Версия приложения на серверер: "+json.getVersion());
-                Log.d("MyLog", "Фактическая версия приложения: "+versionCode);
                 if(versionCode != json.getVersion()){
                     if(condition) viewCallBack.showDialogNewVersion();
                 }

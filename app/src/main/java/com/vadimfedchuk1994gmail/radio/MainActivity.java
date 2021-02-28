@@ -3,7 +3,9 @@
 package com.vadimfedchuk1994gmail.radio;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -27,9 +30,11 @@ import com.vadimfedchuk1994gmail.radio.repository.MainController;
 public class MainActivity extends AppCompatActivity implements
         BottomNavigationView.OnNavigationItemSelectedListener, MainViewCallBack {
 
+    private Context context;
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
     private PlayerFragment mPlayerFragment;
+    private MainController mainController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,22 +43,38 @@ public class MainActivity extends AppCompatActivity implements
         initParams();
         initView();
         lock();
-        MainController mainController = new MainController(this);
+        mainController = new MainController(this);
         mainController.getLastVersionApp();
     }
 
     @Override
     protected void onDestroy() {
         if(wakeLock != null) wakeLock.release();
+        mainController.repositoryCondition(false);
         super.onDestroy();
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mainController.repositoryCondition(true);
+    }
+
+    @Override
     public void showDialogNewVersion() {
-        Log.d("MyLog", "Должен отобразиться диалог с информацией о том, что приложение было обновленно!");
+        AlertDialog.Builder alertDialogBan = new AlertDialog.Builder(context);
+        alertDialogBan.setTitle(R.string.new_version).setMessage(R.string.new_version_description)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.cancel())
+                .setPositiveButton(R.string.app_update, (dialog, which) -> {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse("https://play.google.com/store/apps/details?id=com.vadimfedchuk1994gmail.radio"));
+                    startActivity(i);
+                });
+        alertDialogBan.show();
     }
 
     private void initParams() {
+        context = this;
         FirebaseMessaging.getInstance().subscribeToTopic("translation");
         FirebaseMessaging.getInstance().subscribeToTopic("android_translation");
     }
