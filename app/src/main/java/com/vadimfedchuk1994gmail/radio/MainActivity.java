@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if(wakeLock != null) wakeLock.release();
+        super.onDestroy();
     }
 
     @Override
