@@ -20,10 +20,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
+import com.vadimfedchuk1994gmail.radio.intarfaces.MainViewCallBack;
+import com.vadimfedchuk1994gmail.radio.repository.MainController;
 
 
 public class MainActivity extends AppCompatActivity implements
-        BottomNavigationView.OnNavigationItemSelectedListener {
+        BottomNavigationView.OnNavigationItemSelectedListener, MainViewCallBack {
 
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
@@ -36,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements
         initParams();
         initView();
         lock();
+        MainController mainController = new MainController(this);
+        mainController.getLastVersionApp();
     }
 
     @Override
@@ -45,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void showDialogNewVersion() {
+        Log.d("MyLog", "Должен отобразиться диалог с информацией о том, что приложение было обновленно!");
     }
 
     private void initParams() {
@@ -102,5 +106,4 @@ public class MainActivity extends AppCompatActivity implements
         mFragmentTransaction.commit();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
-
 }
