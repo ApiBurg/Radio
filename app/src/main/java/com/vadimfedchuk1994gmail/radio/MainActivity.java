@@ -24,7 +24,7 @@ import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
 import com.vadimfedchuk1994gmail.radio.intarfaces.MainViewCallBack;
-import com.vadimfedchuk1994gmail.radio.repository.MainController;
+import com.vadimfedchuk1994gmail.radio.controllers.MainController;
 
 
 public class MainActivity extends AppCompatActivity implements

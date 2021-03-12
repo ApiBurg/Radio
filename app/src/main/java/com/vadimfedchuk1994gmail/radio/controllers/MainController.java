@@ -1,13 +1,12 @@
-package com.vadimfedchuk1994gmail.radio.repository;
+package com.vadimfedchuk1994gmail.radio.controllers;
 
+import android.os.Build;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.BuildConfig;
 import com.vadimfedchuk1994gmail.radio.intarfaces.MainViewCallBack;
-import com.vadimfedchuk1994gmail.radio.models.VersionAppPOJO;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -27,14 +26,13 @@ public class MainController {
 
     public void getLastVersionApp(){
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://univer-fm.ru", new AsyncHttpResponseHandler() {
+        client.get("http://mobile.puls-radio.ru/Version.txt", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 String response = new String(responseBody);
-                Gson gson = new Gson();
-                VersionAppPOJO json = gson.fromJson(response, VersionAppPOJO.class);
-                int versionCode = BuildConfig.VERSION_CODE;
-                if(versionCode != json.getVersion()){
+                int actualVersionApp = Integer.parseInt(response);
+                if(actualVersionApp == 0) return;
+                if(BuildConfig.VERSION_CODE < actualVersionApp) {
                     if(condition) viewCallBack.showDialogNewVersion();
                 }
             }
