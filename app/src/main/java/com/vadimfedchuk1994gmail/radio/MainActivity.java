@@ -3,28 +3,25 @@
 package com.vadimfedchuk1994gmail.radio;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.vadimfedchuk1994gmail.radio.controllers.MainController;
 import com.vadimfedchuk1994gmail.radio.fragments.InfoFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayListFragment;
 import com.vadimfedchuk1994gmail.radio.fragments.PlayerFragment;
 import com.vadimfedchuk1994gmail.radio.intarfaces.MainViewCallBack;
-import com.vadimfedchuk1994gmail.radio.controllers.MainController;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -33,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements
     private Context context;
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
-    private PlayerFragment mPlayerFragment;
     private MainController mainController;
 
     @Override
@@ -84,20 +80,20 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mPlayerFragment  = new PlayerFragment();
-        mFragmentTransaction.add(R.id.main_container, mPlayerFragment);
-        mFragmentTransaction.commitNowAllowingStateLoss();
+        mFragmentTransaction.add(R.id.main_container, new PlayerFragment());
+        mFragmentTransaction.commit();
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        //getSupportFragmentManager().popBackStack();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         if(itemId == R.id.action_playlist){
+            if(mBottomNavigationView.getSelectedItemId() == R.id.action_playlist) return true;
             mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
         } else if(itemId == R.id.action_play){
-            mFragmentTransaction.replace(R.id.main_container, mPlayerFragment);
+            if(mBottomNavigationView.getSelectedItemId() == R.id.action_play) return true;
+            mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
         } else if(itemId == R.id.action_info){
             mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         }
@@ -121,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void setInfoFragment(){
-        //getSupportFragmentManager().popBackStack();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         mFragmentTransaction.commit();

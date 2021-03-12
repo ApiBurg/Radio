@@ -19,18 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.vadimfedchuk1994gmail.radio.R;
 import com.vadimfedchuk1994gmail.radio.adapters.PlayListAdapter;
+import com.vadimfedchuk1994gmail.radio.controllers.PlayListController;
 import com.vadimfedchuk1994gmail.radio.intarfaces.PlayListViewCallBack;
 import com.vadimfedchuk1994gmail.radio.models.PlayListPOJO;
-import com.vadimfedchuk1994gmail.radio.repository.PlayListController;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
-import cz.msebera.android.httpclient.Header;
 
 public class PlayListFragment extends Fragment implements PlayListViewCallBack {
 
@@ -73,31 +68,27 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
         mErrorTextView.setVisibility(View.GONE);
         Typeface mGeometriaFace = Typeface.createFromAsset(getContext().getAssets(), "geometria.ttf");
         mErrorTextView.setTypeface(mGeometriaFace);
+        loadPlayListOnServer();
         return view;
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-        mErrorTextView.setVisibility(View.GONE);
         playListController.repositoryCondition(true);
-        obj.clear();
-        mProgressBar.setVisibility(View.VISIBLE);
-        mAdapter.notifyDataSetChanged();
-        playListController.getPlayListObject();
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         playListController.repositoryCondition(false);
+        super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         obj.clear();
+        super.onDestroy();
+        Log.d("MyLog", "Фрагмент PlayList уничтожен!");
     }
 
     @Override
@@ -117,6 +108,16 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
         mProgressBar.setVisibility(View.GONE);
         mAdapter.notifyDataSetChanged();
         mErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void loadPlayListOnServer() {
+        Log.d("MyLog", "Размер плей листа: "+obj.size());
+        if(obj.size() == 0){
+            mErrorTextView.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.VISIBLE);
+            mAdapter.notifyDataSetChanged();
+            playListController.getPlayListObject();
+        }
     }
 
 }
