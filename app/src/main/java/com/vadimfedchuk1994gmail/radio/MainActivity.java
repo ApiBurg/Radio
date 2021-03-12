@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        getSupportFragmentManager().popBackStack();
+        //getSupportFragmentManager().popBackStack();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         if(itemId == R.id.action_playlist){
             mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
@@ -121,10 +121,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void setInfoFragment(){
-        getSupportFragmentManager().popBackStack();
+        //getSupportFragmentManager().popBackStack();
         FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
         mFragmentTransaction.commit();
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
+
 }
