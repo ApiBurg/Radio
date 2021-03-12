@@ -63,6 +63,15 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+            Log.d("MyLog", "Восстанавливаем состояние из savedInstanceState");
+            playTime = savedInstanceState.getString("play_time");
+            playSongName = savedInstanceState.getString("play_name");
+        } else {
+            Log.d("MyLog", "Нет данных для восстановления!");
+            playTime = "-- --";
+            playSongName = "Обновление данных...";
+        }
         initParams();
     }
 
@@ -130,6 +139,14 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
         if(myServiceRunning.isMyServiceRunning()) {
             if(mServiceConnection == null) startServicePlayRadio(false);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString("play_time", playTime);
+        outState.putString("play_name", playSongName);
+        super.onSaveInstanceState(outState);
+        Log.d("MyLog", "Сохраняем состояние фрагмента!");
     }
 
     @Override
@@ -246,8 +263,6 @@ public class PlayerFragment extends Fragment implements View.OnClickListener, So
     }
 
     private void initParams() {
-        playTime = "-- --";
-        playSongName = "Обновление данных...";
         DisplayMetrics dm = new DisplayMetrics();
         if(getActivity() != null) getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
         double x = Math.pow(dm.widthPixels/dm.xdpi,2);

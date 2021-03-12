@@ -85,10 +85,8 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
     }
 
     @Override
-    public void onDestroy() {
-        obj.clear();
-        super.onDestroy();
-        Log.d("MyLog", "Фрагмент PlayList уничтожен!");
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override

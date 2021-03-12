@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -31,11 +33,18 @@ public class MainActivity extends AppCompatActivity implements
     private BottomNavigationView mBottomNavigationView;
     private PowerManager.WakeLock wakeLock;
     private MainController mainController;
+    private PlayerFragment playerFragment;
+    private PlayListFragment playListFragment;
+    private InfoFragment infoFragment;
+    private Fragment activeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        playerFragment = new PlayerFragment();
+        playListFragment = new PlayListFragment();
+        infoFragment = new InfoFragment();
         initParams();
         initView();
         lock();
@@ -79,25 +88,29 @@ public class MainActivity extends AppCompatActivity implements
         mBottomNavigationView = findViewById(R.id.main_bottomNavigationView);
         mBottomNavigationView.setSelectedItemId(R.id.action_play);
         mBottomNavigationView.setOnNavigationItemSelectedListener(this);
-        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.add(R.id.main_container, new PlayerFragment());
-        mFragmentTransaction.commit();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_container, playListFragment, "playListFragment").hide(playListFragment)
+                .add(R.id.main_container, infoFragment, "infoFragment").hide(infoFragment)
+                .add(R.id.main_container, playerFragment, "playerFragment").commit();
+        activeFragment = playerFragment;
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
         if(itemId == R.id.action_playlist){
             if(mBottomNavigationView.getSelectedItemId() == R.id.action_playlist) return true;
-            mFragmentTransaction.replace(R.id.main_container, new PlayListFragment());
+            getSupportFragmentManager().beginTransaction().hide(activeFragment).show(playListFragment).commit();
+            activeFragment = playListFragment;
         } else if(itemId == R.id.action_play){
             if(mBottomNavigationView.getSelectedItemId() == R.id.action_play) return true;
-            mFragmentTransaction.replace(R.id.main_container, new PlayerFragment());
+            getSupportFragmentManager().beginTransaction().hide(activeFragment).show(playerFragment).commit();
+            activeFragment = playerFragment;
         } else if(itemId == R.id.action_info){
-            mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
+            if(mBottomNavigationView.getSelectedItemId() == R.id.action_info) return true;
+            getSupportFragmentManager().beginTransaction().hide(activeFragment).show(infoFragment).commit();
+            activeFragment = infoFragment;
         }
-        mFragmentTransaction.commit();
         return true;
     }
 
@@ -117,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void setInfoFragment(){
-        FragmentTransaction mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        mFragmentTransaction.replace(R.id.main_container, new InfoFragment());
-        mFragmentTransaction.commit();
+        if(mBottomNavigationView.getSelectedItemId() == R.id.action_info) return;
+        getSupportFragmentManager().beginTransaction().hide(activeFragment).show(infoFragment).commit();
+        activeFragment = infoFragment;
         mBottomNavigationView.setSelectedItemId(R.id.action_info);
     }
 
