@@ -5,7 +5,6 @@ package com.vadimfedchuk1994gmail.radio.fragments;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,11 +84,6 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void playListOnSuccess(ArrayList<PlayListPOJO> responseObject) {
         mErrorTextView.setVisibility(View.GONE);
         obj.clear();
@@ -109,7 +103,6 @@ public class PlayListFragment extends Fragment implements PlayListViewCallBack {
     }
 
     private void loadPlayListOnServer() {
-        Log.d("MyLog", "Размер плей листа: "+obj.size());
         if(obj.size() == 0){
             mErrorTextView.setVisibility(View.GONE);
             mProgressBar.setVisibility(View.VISIBLE);
